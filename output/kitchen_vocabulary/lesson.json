@@ -1,0 +1,90 @@
+{
+    "topic": "kitchen vocabulary",
+    "words": [
+        {
+            "word": "Spatula",
+            "meaning": "A flat, flexible utensil used for mixing, spreading, or flipping food items.",
+            "part_of_speech": "noun",
+            "difficulty": "beginner",
+            "pronunciation": "/ˈspætʃ.ə.lə/",
+            "translations": {
+                "malayalam": "ചട്ടുകം (Chattuka)",
+                "tamil": "சட்டகம் (Sattagam)",
+                "hindi": "चपटा चम्मच (Chapta chammach)"
+            },
+            "sentences": [
+                "She used a silicone spatula to scrape the cake batter from the bowl.",
+                "Flip the pancake carefully using a wide spatula.",
+                "Make sure you clean the spatula thoroughly after cooking."
+            ]
+        },
+        {
+            "word": "Whisk",
+            "meaning": "A utensil with curved wire loops, used for beating or whipping ingredients smoothly.",
+            "part_of_speech": "noun",
+            "difficulty": "beginner",
+            "pronunciation": "/wɪsk/",
+            "translations": {
+                "malayalam": "അടിക്കുന്ന ഉപകരണം (Adikkunna upakaranam)",
+                "tamil": "முட்டை அடிக்கும் கருவி (Muttai adikkum karuvi)",
+                "hindi": "मथानी (Mathani)"
+            },
+            "sentences": [
+                "Use a stainless steel whisk to beat the eggs until they are fluffy.",
+                "Whisk the flour and milk together to create a smooth batter.",
+                "He bought an electric whisk to save time while baking desserts."
+            ]
+        },
+        {
+            "word": "Colander",
+            "meaning": "A perforated bowl used to drain liquid from foods like pasta or washed vegetables.",
+            "part_of_speech": "noun",
+            "difficulty": "intermediate",
+            "pronunciation": "/ˈkɒl.ɪn.dər/",
+            "translations": {
+                "malayalam": "അരിപ്പക്കലം (Arippakkalam)",
+                "tamil": "வடிகட்டி (Vadigatti)",
+                "hindi": "छलनी (Chhalni)"
+            },
+            "sentences": [
+                "Pour the boiled pasta into the colander to drain the hot water.",
+                "She washed the fresh berries thoroughly in a plastic colander.",
+                "Place the metal colander inside the sink before straining the liquid."
+            ]
+        },
+        {
+            "word": "Simmer",
+            "meaning": "To cook food gently in a liquid held just below its boiling point.",
+            "part_of_speech": "verb",
+            "difficulty": "intermediate",
+            "pronunciation": "/ˈsɪm.ər/",
+            "translations": {
+                "malayalam": "ചെറിയ തീയിൽ വേവിക്കുക (Cheriya theeyil vevikkuka)",
+                "tamil": "மிதமான தீயில் வேகவை (Mithamaana theeyil vegavai)",
+                "hindi": "धीमी आंच पर पकाना (Dheemi aanch par pakana)"
+            },
+            "sentences": [
+                "Let the tomato soup simmer on low heat for twenty minutes.",
+                "The aromatic sauce began to simmer gently on the stove.",
+                "Cover the pot and allow the vegetable curry to simmer until tender."
+            ]
+        },
+        {
+            "word": "Ladle",
+            "meaning": "A large, deep spoon with a long handle, used for serving soup, stew, or sauce.",
+            "part_of_speech": "noun",
+            "difficulty": "beginner",
+            "pronunciation": "/ˈleɪ.dəl/",
+            "translations": {
+                "malayalam": "തവി (Thavi)",
+                "tamil": "அகப்பை (Agappai)",
+                "hindi": "करछुल (Karchhul)"
+            },
+            "sentences": [
+                "He used a wooden ladle to serve the hot soup into deep bowls.",
+                "Dip the ladle into the pot to stir the thick stew gently.",
+                "Stainless steel ladles are durable and easy to clean for daily kitchen use."
+            ]
+        }
+    ]
+}

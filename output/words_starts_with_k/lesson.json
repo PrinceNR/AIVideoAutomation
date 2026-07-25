@@ -1,0 +1,90 @@
+{
+    "topic": "words starts with k",
+    "words": [
+        {
+            "word": "Kaleidoscope",
+            "meaning": "A constantly changing pattern or sequence of elements.",
+            "part_of_speech": "Noun",
+            "difficulty": "Intermediate",
+            "pronunciation": "/kəˈlaɪ.də.skoʊp/",
+            "translations": {
+                "malayalam": "ബഹുവർണ്ണക്കാഴ്ച",
+                "tamil": "பன்னிறக் காட்சி",
+                "hindi": "बहुरूपदर्शक"
+            },
+            "sentences": [
+                "The street market was a kaleidoscope of bright colors and fragrant smells.",
+                "Children love looking through a kaleidoscope to see colorful geometric patterns.",
+                "The festival presented a kaleidoscope of traditional music and dance forms."
+            ]
+        },
+        {
+            "word": "Kinetic",
+            "meaning": "Relating to or resulting from motion.",
+            "part_of_speech": "Adjective",
+            "difficulty": "Intermediate",
+            "pronunciation": "/kɪˈnet.ɪk/",
+            "translations": {
+                "malayalam": "ചലനാത്മകമായ",
+                "tamil": "இயக்க சார்ந்த",
+                "hindi": "गतिज"
+            },
+            "sentences": [
+                "Windmills convert kinetic energy from the wind into electrical power.",
+                "The dance performance was full of kinetic energy and high momentum.",
+                "Sculptures with moving parts are a great example of kinetic art."
+            ]
+        },
+        {
+            "word": "Knack",
+            "meaning": "A special skill, talent, or aptitude for doing something easily.",
+            "part_of_speech": "Noun",
+            "difficulty": "Easy",
+            "pronunciation": "/næk/",
+            "translations": {
+                "malayalam": "കൈവഴക്കം",
+                "tamil": "திறமை",
+                "hindi": "कुशलता"
+            },
+            "sentences": [
+                "She has a remarkable knack for remembering people's names.",
+                "Cooking requires practice, but some people naturally have a knack for it.",
+                "He quickly got the knack of riding a bicycle without training wheels."
+            ]
+        },
+        {
+            "word": "Kindle",
+            "meaning": "To set something on fire, or to inspire an emotion or passion.",
+            "part_of_speech": "Verb",
+            "difficulty": "Intermediate",
+            "pronunciation": "/ˈkɪn.dəl/",
+            "translations": {
+                "malayalam": "ഉണർത്തുക",
+                "tamil": "தூண்டு",
+                "hindi": "प्रज्वलित करना"
+            },
+            "sentences": [
+                "The teacher helped kindle a lifelong love of reading in her students.",
+                "We used dry twigs and paper to kindle the campfire.",
+                "Her speech managed to kindle hope among the audience members."
+            ]
+        },
+        {
+            "word": "Kudos",
+            "meaning": "Praise, respect, and honor received for an achievement.",
+            "part_of_speech": "Noun",
+            "difficulty": "Intermediate",
+            "pronunciation": "/ˈkuː.dɑːs/",
+            "translations": {
+                "malayalam": "അഭിനന്ദനം",
+                "tamil": "பாராட்டு",
+                "hindi": "प्रशंसा"
+            },
+            "sentences": [
+                "The team earned kudos from management for completing the project early.",
+                "Kudos to Sarah for organizing such a successful community event.",
+                "He received widespread kudos for his heroic actions during the emergency."
+            ]
+        }
+    ]
+}

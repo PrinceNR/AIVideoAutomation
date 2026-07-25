@@ -69,14 +69,37 @@
 
 # generate_vocabulary(topic, count)
 
+# import json
+
+# from ai.content_generator import generate_vocabulary
+
+
+# topic = input("Topic : ")
+# count = int(input("Number of words : "))
+
+# data = generate_vocabulary(topic, count)
+
+# print(json.dumps(data, indent=4, ensure_ascii=False))
+
+
 import json
 
 from ai.content_generator import generate_vocabulary
-
+from utils.file_manager import FileManager
 
 topic = input("Topic : ")
 count = int(input("Number of words : "))
 
 data = generate_vocabulary(topic, count)
+
+file_manager = FileManager()
+
+lesson_folder = file_manager.create_lesson_folder(topic)
+
+json_file = lesson_folder / "lesson.json"
+
+file_manager.save_json(data, json_file)
+
+print("\nLesson saved successfully!")
 
 print(json.dumps(data, indent=4, ensure_ascii=False))
