@@ -1,0 +1,5 @@
+IMAGE_COUNT = 3
+
+IMAGE_FORMAT = "jpg"
+
+OUTPUT_FOLDER = "output"

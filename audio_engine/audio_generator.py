@@ -1,0 +1,2 @@
+class AudioGenerator:
+    pass

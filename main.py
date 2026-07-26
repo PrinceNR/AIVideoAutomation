@@ -82,37 +82,48 @@
 # print(json.dumps(data, indent=4, ensure_ascii=False))
 
 
-import json
+# import json
 
-from ai.content_generator import generate_vocabulary
-from utils.file_manager import FileManager
-from image_engine.image_downloader import ImageDownloader
+# from ai.content_generator import generate_vocabulary
+# from utils.file_manager import FileManager
+# from image_engine.image_downloader import ImageDownloader
 
 
-topic = input("Topic : ")
-count = int(input("Number of words : "))
+# topic = input("Topic : ")
+# count = int(input("Number of words : "))
 
-data = generate_vocabulary(topic, count)
+# data = generate_vocabulary(topic, count)
 
-file_manager = FileManager()
+# file_manager = FileManager()
 
-lesson_folder = file_manager.create_lesson_folder(topic)
+# lesson_folder = file_manager.create_lesson_folder(topic)
 
-json_file = lesson_folder / "lesson.json"
+# json_file = lesson_folder / "lesson.json"
 
-file_manager.save_json(data, json_file)
+# file_manager.save_json(data, json_file)
 
-downloader = ImageDownloader()
+# downloader = ImageDownloader()
 
-lesson = file_manager.load_json(json_file)
+# lesson = file_manager.load_json(json_file)
 
-for word in lesson["words"]:
+# for word in lesson["words"]:
 
-    downloader.download_word_images(
-        word["word"],
-        lesson_folder
-    )
+#     downloader.download_word_images(
+#         word["word"],
+#         lesson_folder
+#     )
 
-print("\nLesson saved successfully!")
+# print("\nLesson saved successfully!")
 
-print(json.dumps(data, indent=4, ensure_ascii=False))
+# print(json.dumps(data, indent=4, ensure_ascii=False))
+
+
+from pipeline.vocabulary_pipeline import VocabularyPipeline
+
+topic = input("Topic: ")
+
+count = int(input("Number of words: "))
+
+pipeline = VocabularyPipeline()
+
+pipeline.run(topic, count)

@@ -1,0 +1,56 @@
+{
+    "topic": "kitchen",
+    "words": [
+        {
+            "word": "Spatula",
+            "meaning": "A utensil with a broad, flat, flexible blade used for mixing, spreading, and lifting foods.",
+            "part_of_speech": "Noun",
+            "difficulty": "Intermediate",
+            "pronunciation": "/ˈspætʃ.ə.lə/",
+            "translations": {
+                "malayalam": "തവി (Thavi) / സ്പാറ്റുള",
+                "tamil": "துடுப்புக்கரண்டி (Thuduppukkarandi)",
+                "hindi": "चपटा चम्मच (Chapta chammach)"
+            },
+            "sentences": [
+                "She used a silicone spatula to scrape the last bit of batter from the bowl.",
+                "Flip the pancake carefully using a broad spatula.",
+                "Make sure to clean the rubber spatula thoroughly after making the cake frosting."
+            ]
+        },
+        {
+            "word": "Colander",
+            "meaning": "A perforated bowl used to strain off liquid from cooked pasta or washed vegetables.",
+            "part_of_speech": "Noun",
+            "difficulty": "Intermediate",
+            "pronunciation": "/ˈkɒl.ɪn.dər/",
+            "translations": {
+                "malayalam": "അരിപ്പക്കലം (Arippakkalam)",
+                "tamil": "வடிகட்டி பாத்திரம் (Vadikatti paathiram)",
+                "hindi": "छलनी (Chhalni)"
+            },
+            "sentences": [
+                "Pour the hot spaghetti into the colander to drain the excess water.",
+                "He placed the freshly washed strawberries in a colander to dry.",
+                "A stainless steel colander is an essential tool in any modern kitchen."
+            ]
+        },
+        {
+            "word": "Simmer",
+            "meaning": "To cook liquid or food in liquid gently at or just below the boiling point.",
+            "part_of_speech": "Verb",
+            "difficulty": "Intermediate",
+            "pronunciation": "/ˈsɪm.ər/",
+            "translations": {
+                "malayalam": "ചെറുതീയിൽ വേവിക്കുക (Cherutheeyil vevikkuka)",
+                "tamil": "மெல்லிய தீயில் வேகவை (Melliya theeyil vegavai)",
+                "hindi": "धीमी आंच पर पकाना (Dheemi aanch par pakana)"
+            },
+            "sentences": [
+                "Reduce the flame and let the soup simmer for twenty minutes.",
+                "The tomato sauce needs to simmer gently to allow the spices to blend well.",
+                "She covered the pot and allowed the curry to simmer until the meat was tender."
+            ]
+        }
+    ]
+}

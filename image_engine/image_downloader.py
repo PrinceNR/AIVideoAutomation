@@ -1,6 +1,8 @@
 from pathlib import Path
 
 from image_engine.pexels_client import PexelsClient
+from models.word import Word
+from config import IMAGE_COUNT
 
 
 class ImageDownloader:
@@ -11,14 +13,15 @@ class ImageDownloader:
 
     def download_word_images(
         self,
-        word: str,
+        word: Word,
         lesson_folder: Path,
-        per_page: int = 3
+        per_page: int = IMAGE_COUNT
     ):
 
+        
         images = self.client.search(word, per_page)
 
-        image_folder = lesson_folder / "images" / word.lower()
+        image_folder = lesson_folder / "images" / word.word.lower()
 
         image_folder.mkdir(
             parents=True,
@@ -34,4 +37,4 @@ class ImageDownloader:
                 image_folder / filename
             )
 
-        print(f"Finished downloading images for {word}")
+        print(f"Finished downloading images for {word.word}")

@@ -1,7 +1,8 @@
 from pathlib import Path
 import json
 import re
-
+from models.lesson import Lesson
+from models.lesson_mapper import LessonMapper
 
 class FileManager:
 
@@ -37,3 +38,14 @@ class FileManager:
         with open(file_path, "r", encoding="utf-8") as file:
 
             return json.load(file)
+
+    # def load_lesson(self, path):
+
+    #     data = self.load_json(path)
+
+    #     return LessonMapper.from_dict(data)
+    def load_lesson(self, path: Path) -> Lesson:
+
+        data = self.load_json(path)
+
+        return LessonMapper.from_dict(data)
