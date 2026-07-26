@@ -3,87 +3,87 @@
     "words": [
         {
             "word": "Spatula",
-            "meaning": "A flat, flexible utensil used for mixing, spreading, or flipping food items.",
+            "meaning": "A broad, flat, flexible blade used to mix, spread, and lift food items.",
             "part_of_speech": "noun",
-            "difficulty": "beginner",
+            "difficulty": "easy",
             "pronunciation": "/ˈspætʃ.ə.lə/",
             "translations": {
-                "malayalam": "ചട്ടുകം (Chattuka)",
-                "tamil": "சட்டகம் (Sattagam)",
-                "hindi": "चपटा चम्मच (Chapta chammach)"
+                "malayalam": "തവി (Thavi)",
+                "tamil": "சப்பையான கரண்டி (Sappaiyana karandi)",
+                "hindi": "स्पैटुला / चपटा चम्मच (Chapta chammach)"
             },
             "sentences": [
-                "She used a silicone spatula to scrape the cake batter from the bowl.",
-                "Flip the pancake carefully using a wide spatula.",
-                "Make sure you clean the spatula thoroughly after cooking."
-            ]
-        },
-        {
-            "word": "Whisk",
-            "meaning": "A utensil with curved wire loops, used for beating or whipping ingredients smoothly.",
-            "part_of_speech": "noun",
-            "difficulty": "beginner",
-            "pronunciation": "/wɪsk/",
-            "translations": {
-                "malayalam": "അടിക്കുന്ന ഉപകരണം (Adikkunna upakaranam)",
-                "tamil": "முட்டை அடிக்கும் கருவி (Muttai adikkum karuvi)",
-                "hindi": "मथानी (Mathani)"
-            },
-            "sentences": [
-                "Use a stainless steel whisk to beat the eggs until they are fluffy.",
-                "Whisk the flour and milk together to create a smooth batter.",
-                "He bought an electric whisk to save time while baking desserts."
+                "She used a silicone spatula to scrape the batter from the bowl.",
+                "Flip the pancake carefully using a flat spatula.",
+                "Make sure to clean the spatula after cooking."
             ]
         },
         {
             "word": "Colander",
-            "meaning": "A perforated bowl used to drain liquid from foods like pasta or washed vegetables.",
+            "meaning": "A bowl-shaped kitchen utensil with holes used for draining liquids from food.",
             "part_of_speech": "noun",
             "difficulty": "intermediate",
             "pronunciation": "/ˈkɒl.ɪn.dər/",
             "translations": {
-                "malayalam": "അരിപ്പക്കലം (Arippakkalam)",
+                "malayalam": "അരിപ്പ പാത്രം (Arippa paathram)",
                 "tamil": "வடிகட்டி (Vadigatti)",
                 "hindi": "छलनी (Chhalni)"
             },
             "sentences": [
-                "Pour the boiled pasta into the colander to drain the hot water.",
-                "She washed the fresh berries thoroughly in a plastic colander.",
-                "Place the metal colander inside the sink before straining the liquid."
+                "Pour the cooked pasta into a colander to drain the water.",
+                "Wash the fresh berries in a stainless steel colander.",
+                "Place the colander in the sink before pouring out the hot water."
+            ]
+        },
+        {
+            "word": "Whisk",
+            "meaning": "A cooking utensil made of wire loops, used for beating or whipping ingredients.",
+            "part_of_speech": "noun",
+            "difficulty": "easy",
+            "pronunciation": "/wɪsk/",
+            "translations": {
+                "malayalam": "മുട്ട അടിയ്ക്കുന്ന തവി (Mutta adikkunna thavi)",
+                "tamil": "முட்டை அடிக்கும் கருவி (Muttai adikkum karuvi)",
+                "hindi": "फेंटनी (Phentani)"
+            },
+            "sentences": [
+                "Use a wire whisk to combine the flour and baking powder evenly.",
+                "Beat the egg whites with a whisk until soft peaks form.",
+                "She bought a new stainless steel whisk for baking."
             ]
         },
         {
             "word": "Simmer",
-            "meaning": "To cook food gently in a liquid held just below its boiling point.",
+            "meaning": "To cook food gently in liquid kept just below the boiling point.",
             "part_of_speech": "verb",
             "difficulty": "intermediate",
             "pronunciation": "/ˈsɪm.ər/",
             "translations": {
-                "malayalam": "ചെറിയ തീയിൽ വേവിക്കുക (Cheriya theeyil vevikkuka)",
-                "tamil": "மிதமான தீயில் வேகவை (Mithamaana theeyil vegavai)",
+                "malayalam": "ചെറുതീയിൽ തിളപ്പിക്കുക (Cherutheeyil thilappikkuka)",
+                "tamil": "மிதமான தீயில் கொதிக்கவை (Mithamana theeyil kothikkavai)",
                 "hindi": "धीमी आंच पर पकाना (Dheemi aanch par pakana)"
             },
             "sentences": [
-                "Let the tomato soup simmer on low heat for twenty minutes.",
-                "The aromatic sauce began to simmer gently on the stove.",
-                "Cover the pot and allow the vegetable curry to simmer until tender."
+                "Lower the heat and let the soup simmer for twenty minutes.",
+                "The sauce needs to simmer slowly so the flavors can blend together.",
+                "Cover the pot and simmer the stew on low heat."
             ]
         },
         {
             "word": "Ladle",
-            "meaning": "A large, deep spoon with a long handle, used for serving soup, stew, or sauce.",
+            "meaning": "A large long-handled spoon with a deep bowl, used for serving soup or liquid food.",
             "part_of_speech": "noun",
-            "difficulty": "beginner",
+            "difficulty": "easy",
             "pronunciation": "/ˈleɪ.dəl/",
             "translations": {
-                "malayalam": "തവി (Thavi)",
-                "tamil": "அகப்பை (Agappai)",
-                "hindi": "करछुल (Karchhul)"
+                "malayalam": "കോരിത്തവി (Korithavi)",
+                "tamil": "குழிவான கரண்டி (Kuzhivana karandi)",
+                "hindi": "कछुल (Kachhul)"
             },
             "sentences": [
-                "He used a wooden ladle to serve the hot soup into deep bowls.",
-                "Dip the ladle into the pot to stir the thick stew gently.",
-                "Stainless steel ladles are durable and easy to clean for daily kitchen use."
+                "He used a big ladle to pour the hot soup into bowls.",
+                "Always keep a ladle near the pot when cooking curry.",
+                "The soup ladle is made of heat-resistant plastic."
             ]
         }
     ]

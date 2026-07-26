@@ -86,6 +86,8 @@ import json
 
 from ai.content_generator import generate_vocabulary
 from utils.file_manager import FileManager
+from image_engine.image_downloader import ImageDownloader
+
 
 topic = input("Topic : ")
 count = int(input("Number of words : "))
@@ -99,6 +101,17 @@ lesson_folder = file_manager.create_lesson_folder(topic)
 json_file = lesson_folder / "lesson.json"
 
 file_manager.save_json(data, json_file)
+
+downloader = ImageDownloader()
+
+lesson = file_manager.load_json(json_file)
+
+for word in lesson["words"]:
+
+    downloader.download_word_images(
+        word["word"],
+        lesson_folder
+    )
 
 print("\nLesson saved successfully!")
 
