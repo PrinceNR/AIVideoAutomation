@@ -1,6 +1,7 @@
 from ai.content_generator import generate_vocabulary
 from image_engine.image_downloader import ImageDownloader
 from utils.file_manager import FileManager
+from audio_engine.audio_generator import AudioGenerator
 
 
 class VocabularyPipeline:
@@ -9,6 +10,7 @@ class VocabularyPipeline:
 
         self.file_manager = FileManager()
         self.image_downloader = ImageDownloader()
+        self.audio_generator = AudioGenerator()
 
     def run(self, topic: str, count: int):
 
@@ -41,5 +43,10 @@ class VocabularyPipeline:
                 word,
                 lesson_folder
             )
+
+            self.audio_generator.generate_word_audio(
+                word,
+                lesson_folder
+            )    
 
         print("\nPipeline completed successfully!")

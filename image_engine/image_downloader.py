@@ -1,5 +1,4 @@
 from pathlib import Path
-
 from image_engine.pexels_client import PexelsClient
 from models.word import Word
 from config import IMAGE_COUNT
