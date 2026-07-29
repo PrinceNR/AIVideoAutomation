@@ -1,4 +1,5 @@
 from pathlib import Path
+
 from audio_engine.elevenlabs_client import ElevenLabsClient
 from models.word import Word
 
@@ -14,29 +15,27 @@ class AudioGenerator:
         lesson_folder: Path
     ):
 
-        
-
         audio_folder = lesson_folder / "audio" / word.word.lower()
 
         audio_folder.mkdir(
             parents=True,
             exist_ok=True
         )
-        # Generate pronunciation
-        self.client.generate_audio(
-            text=word.word,
-            output_path=audio_folder / "pronunciation.mp3"
-        )
 
-        # Generate sentence audio
-        for index, sentence in enumerate(word.sentences, start=1):
+        audio_tasks = {
+            "pronunciation.mp3": word.word,
+            "meaning.mp3": word.meaning,
+            "present_sentence.mp3": word.present_sentence,
+            "past_sentence.mp3": word.past_sentence,
+            "future_sentence.mp3": word.future_sentence,
+        }
+        for filename, text in audio_tasks.items():
 
-            filename = f"sentence{index}.mp3"
+            try:
+                self.client.generate_audio(
+                    text=text,
+                    output_path=audio_folder / filename
+                )
+            except Exception as e:
+                print(f"Failed to generate {filename}: {e}")
 
-            self.client.generate_audio(
-                text=sentence,
-                output_path=audio_folder / filename
-            )
-
-
-        print(f"Finished downloading audio for {word.word}")

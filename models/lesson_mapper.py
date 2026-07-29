@@ -18,13 +18,25 @@ class LessonMapper:
                 pronunciation=item.get("pronunciation", ""),
                 part_of_speech=item.get("part_of_speech", ""),
                 difficulty=item.get("difficulty", ""),
+
                 translations=item.get("translations", {}),
-                sentences=item.get("sentences", []),
+
+                present_sentence=item.get("present_sentence", ""),
+                past_sentence=item.get("past_sentence", ""),
+                future_sentence=item.get("future_sentence", ""),
+
+                base_form=item.get("base_form", ""),
+                present_form=item.get("present_form", ""),
+                past_form=item.get("past_form", ""),
+
                 synonyms=item.get("synonyms", []),
                 antonyms=item.get("antonyms", []),
+
                 image_keywords=item.get("image_keywords", []),
-                audio_path=item.get("audio_path"),
-                image_path=item.get("image_path"),
+                search_query=item.get("search_query", ""),
+
+                image_folder=item.get("image_folder"),
+                audio_folder=item.get("audio_folder"),
             )
 
             words.append(word)
@@ -34,3 +46,5 @@ class LessonMapper:
             topic=data.get("topic", ""),
             words=words,
         )
+
+        
