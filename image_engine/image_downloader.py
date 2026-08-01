@@ -35,5 +35,11 @@ class ImageDownloader:
                 image_url,
                 image_folder / filename
             )
+            # Save the folder location
+            # word.image_folder = str(image_folder)
+            # word.image_path = str(image_folder / "001.jpg")
+
+        word.image_folder = str(image_folder)
+        word.default_image = str(image_folder / "001.jpg")
 
         print(f"Finished downloading images for {word.word}")

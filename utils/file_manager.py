@@ -39,11 +39,6 @@ class FileManager:
 
             return json.load(file)
 
-    # def load_lesson(self, path):
-
-    #     data = self.load_json(path)
-
-    #     return LessonMapper.from_dict(data)
     def load_lesson(self, path: Path) -> Lesson:
 
         data = self.load_json(path)

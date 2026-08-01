@@ -39,3 +39,5 @@ class AudioGenerator:
             except Exception as e:
                 print(f"Failed to generate {filename}: {e}")
 
+        word.audio_folder = str(audio_folder)
+        word.default_audio = str(audio_folder / "pronunciation.mp3")

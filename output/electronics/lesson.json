@@ -1,0 +1,47 @@
+{
+    "title": "",
+    "topic": "Electronics",
+    "words": [
+        {
+            "word": "Circuit",
+            "meaning": "A complete path around which an electrical current can flow.",
+            "pronunciation": "/ˈsɜːrkɪt/",
+            "part_of_speech": "Noun",
+            "difficulty": "Intermediate",
+            "translations": {
+                "malayalam": "സർക്യൂട്ട്",
+                "tamil": "மின்சுற்று",
+                "hindi": "परिपथ"
+            },
+            "present_sentence": "The engineer inspects the electrical circuit to ensure all components function properly.",
+            "past_sentence": "A short circuit damaged the main board of the television yesterday afternoon.",
+            "future_sentence": "The technician will repair the broken circuit before testing the device again.",
+            "base_form": "",
+            "present_form": "",
+            "past_form": "",
+            "synonyms": [
+                "loop",
+                "network",
+                "channel",
+                "pathway"
+            ],
+            "antonyms": [
+                "disconnection",
+                "break",
+                "interruption"
+            ],
+            "image_keywords": [
+                "electronic circuit",
+                "circuit board",
+                "microchip",
+                "electricity",
+                "technology"
+            ],
+            "search_query": "",
+            "image_folder": "output\\electronics\\images\\circuit",
+            "audio_folder": "output\\electronics\\audio\\circuit",
+            "default_audio": "output\\electronics\\audio\\circuit\\pronunciation.mp3",
+            "default_image": "output\\electronics\\images\\circuit\\001.jpg"
+        }
+    ]
+}

@@ -6,11 +6,16 @@ from models.word import Word
 class LessonMapper:
 
     @staticmethod
+    def to_dict(lesson: Lesson) -> dict:
+
+        return asdict(lesson)
+    
     def from_dict(data: dict) -> Lesson:
 
         words = []
 
         for item in data.get("words", []):
+
 
             word = Word(
                 word=item.get("word", ""),
@@ -35,9 +40,10 @@ class LessonMapper:
                 image_keywords=item.get("image_keywords", []),
                 search_query=item.get("search_query", ""),
 
-                image_folder=item.get("image_folder"),
-                audio_folder=item.get("audio_folder"),
+                default_image=item.get("default_image"),
+                default_audio=item.get("default_audio"),
             )
+
 
             words.append(word)
 
@@ -47,4 +53,3 @@ class LessonMapper:
             words=words,
         )
 
-        

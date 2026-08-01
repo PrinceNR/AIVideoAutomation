@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from pathlib import Path
 
 
 @dataclass
@@ -27,3 +28,6 @@ class Word:
 
     image_folder: str | None = None
     audio_folder: str | None = None
+
+    default_audio: str | None = None
+    default_image: str | None = None

@@ -2,6 +2,7 @@ from ai.content_generator import generate_vocabulary
 from image_engine.image_downloader import ImageDownloader
 from utils.file_manager import FileManager
 from audio_engine.audio_generator import AudioGenerator
+from models.lesson_mapper import LessonMapper
 
 
 class VocabularyPipeline:
@@ -22,18 +23,15 @@ class VocabularyPipeline:
 
         lesson_path = lesson_folder / "lesson.json"
 
+        lesson_dict = LessonMapper.to_dict(lesson)
+
         self.file_manager.save_json(
-            lesson,
+            lesson_dict,
             lesson_path
         )
 
         print("Downloading images...")
 
-        # lesson_data = self.file_manager.load_json(
-        #     lesson_path
-        # )
-
-        # for word in lesson_data["words"]:
 
         lesson = self.file_manager.load_lesson(lesson_path)
 
@@ -47,6 +45,14 @@ class VocabularyPipeline:
             self.audio_generator.generate_word_audio(
                 word,
                 lesson_folder
-            )    
+            )
+
+        lesson_dict = LessonMapper.to_dict(lesson)
+
+        self.file_manager.save_json(
+            lesson_dict,
+            lesson_path
+        ) 
+        
 
         print("\nPipeline completed successfully!")

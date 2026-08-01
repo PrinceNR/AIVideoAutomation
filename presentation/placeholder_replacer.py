@@ -1,12 +1,15 @@
-from pptx import Presentation
 from models.word import Word
+from pptx.slide import Slide
+
 
 
 class PlaceholderReplacer:
 
+    
+
     def replace_word(
         self,
-        presentation: Presentation,
+        slide: Slide,
         word: Word,
         word_number: int,
         total_words: int
@@ -21,10 +24,11 @@ class PlaceholderReplacer:
         for placeholder, value in placeholders.items():
 
             self.replace_text(
-                presentation,
+                slide,
                 placeholder,
                 str(value)
             )
+
 
     def _get_word_placeholders(
         self,
@@ -55,28 +59,29 @@ class PlaceholderReplacer:
 
             "{{WORD_NUMBER}}": f"{word_number}/{total_words}",
         }
+
+    
     def replace_text(
         self,
-        presentation: Presentation,
+        slide: Slide,
         placeholder: str,
         value: str
     ):
-        for slide in presentation.slides:
+        
+        for shape in slide.shapes:
 
-            for shape in slide.shapes:
+            if not shape.has_text_frame:
+                continue
 
-                if not shape.has_text_frame:
-                    continue
+            for paragraph in shape.text_frame.paragraphs:
 
-                for paragraph in shape.text_frame.paragraphs:
+                for run in paragraph.runs:
 
-                    for run in paragraph.runs:
+                    if placeholder in run.text:
 
-                        if placeholder in run.text:
+                        print(f"Replacing {placeholder} -> {value}")
 
-                            print(f"Replacing {placeholder} -> {value}")
-
-                            run.text = run.text.replace(
-                                placeholder,
-                                value
-                            )
+                        run.text = run.text.replace(
+                            placeholder,
+                            value
+                        )
