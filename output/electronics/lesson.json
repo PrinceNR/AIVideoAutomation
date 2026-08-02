@@ -1,47 +1,126 @@
 {
     "title": "",
-    "topic": "Electronics",
+    "topic": "electronics",
     "words": [
         {
             "word": "Circuit",
-            "meaning": "A complete path around which an electrical current can flow.",
+            "meaning": "A complete closed path through which electric current can flow.",
             "pronunciation": "/ˈsɜːrkɪt/",
-            "part_of_speech": "Noun",
+            "part_of_speech": "noun",
             "difficulty": "Intermediate",
             "translations": {
                 "malayalam": "സർക്യൂട്ട്",
                 "tamil": "மின்சுற்று",
                 "hindi": "परिपथ"
             },
-            "present_sentence": "The engineer inspects the electrical circuit to ensure all components function properly.",
-            "past_sentence": "A short circuit damaged the main board of the television yesterday afternoon.",
-            "future_sentence": "The technician will repair the broken circuit before testing the device again.",
+            "present_sentence": "The engineer checks the circuit to fix the broken electrical connection.",
+            "past_sentence": "He designed a complex circuit board for the new smartphone yesterday.",
+            "future_sentence": "The technician will test the main circuit before turning on the power.",
             "base_form": "",
             "present_form": "",
             "past_form": "",
             "synonyms": [
                 "loop",
+                "path",
                 "network",
-                "channel",
-                "pathway"
+                "track"
             ],
             "antonyms": [
-                "disconnection",
                 "break",
+                "disconnection",
                 "interruption"
             ],
             "image_keywords": [
-                "electronic circuit",
                 "circuit board",
+                "electronics",
                 "microchip",
-                "electricity",
-                "technology"
+                "electricity"
             ],
             "search_query": "",
             "image_folder": "output\\electronics\\images\\circuit",
             "audio_folder": "output\\electronics\\audio\\circuit",
             "default_audio": "output\\electronics\\audio\\circuit\\pronunciation.mp3",
             "default_image": "output\\electronics\\images\\circuit\\001.jpg"
+        },
+        {
+            "word": "Amplify",
+            "meaning": "To increase the strength or volume of an electrical signal.",
+            "pronunciation": "/ˈæm.plɪ.faɪ/",
+            "part_of_speech": "verb",
+            "difficulty": "Intermediate",
+            "translations": {
+                "malayalam": "വർദ്ധിപ്പിക്കുക",
+                "tamil": "பெருக்கவும்",
+                "hindi": "बढ़ाना"
+            },
+            "present_sentence": "This small device amplifies audio signals without causing any sound distortion.",
+            "past_sentence": "The technician amplified the signal to improve the weak radio reception.",
+            "future_sentence": "The new speaker system will amplify sound clearly across the large room.",
+            "base_form": "amplify",
+            "present_form": "amplifies",
+            "past_form": "amplified",
+            "synonyms": [
+                "boost",
+                "increase",
+                "intensify",
+                "magnify"
+            ],
+            "antonyms": [
+                "reduce",
+                "decrease",
+                "diminish",
+                "weaken"
+            ],
+            "image_keywords": [
+                "amplifier",
+                "audio equipment",
+                "sound wave",
+                "electronics"
+            ],
+            "search_query": "",
+            "image_folder": "output\\electronics\\images\\amplify",
+            "audio_folder": "output\\electronics\\audio\\amplify",
+            "default_audio": "output\\electronics\\audio\\amplify\\pronunciation.mp3",
+            "default_image": "output\\electronics\\images\\amplify\\001.jpg"
+        },
+        {
+            "word": "Conductor",
+            "meaning": "A material or device that allows electricity to flow through easily.",
+            "pronunciation": "/kənˈdʌk.tər/",
+            "part_of_speech": "noun",
+            "difficulty": "Beginner",
+            "translations": {
+                "malayalam": "ചാലകം",
+                "tamil": "கடத்தி",
+                "hindi": "चालक"
+            },
+            "present_sentence": "Copper is a good conductor that carries electricity safely in homes.",
+            "past_sentence": "The scientist discovered that the new metal acted as an efficient conductor.",
+            "future_sentence": "Engineers will use a flexible conductor for the upcoming smart wearable devices.",
+            "base_form": "",
+            "present_form": "",
+            "past_form": "",
+            "synonyms": [
+                "transmitter",
+                "conveyor",
+                "channel",
+                "medium"
+            ],
+            "antonyms": [
+                "insulator",
+                "nonconductor"
+            ],
+            "image_keywords": [
+                "copper wire",
+                "electricity",
+                "metal cable",
+                "physics"
+            ],
+            "search_query": "",
+            "image_folder": "output\\electronics\\images\\conductor",
+            "audio_folder": "output\\electronics\\audio\\conductor",
+            "default_audio": "output\\electronics\\audio\\conductor\\pronunciation.mp3",
+            "default_image": "output\\electronics\\images\\conductor\\001.jpg"
         }
     ]
 }

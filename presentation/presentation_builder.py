@@ -1,6 +1,7 @@
 from presentation.template_loader import TemplateLoader
-from presentation.slide_duplicator import SlideDuplicator
-from presentation.slide_renderer import SlideRenderer
+from presentation.slide_group_renderer import SlideGroupRenderer
+from presentation.slide_group_duplicator import SlideGroupDuplicator
+from presentation.slide_group_manager import SlideGroupManager
 
 
 class PresentationBuilder:
@@ -8,9 +9,9 @@ class PresentationBuilder:
     def __init__(self):
 
         self.loader = TemplateLoader()
-        self.duplicator = SlideDuplicator()
-        self.renderer = SlideRenderer()
-       
+        self.duplicator = SlideGroupDuplicator()
+        self.renderer = SlideGroupRenderer() 
+        self.manager = SlideGroupManager()    
 
     def build(
         self,
@@ -23,30 +24,61 @@ class PresentationBuilder:
         template_path
         )
 
-        template_slide = presentation.slides[0]
+        # template_group = [presentation.slides[i] for i in range(4)]
 
-        for index, word in enumerate(lesson.words, start=1):
+        # template_slide = presentation.slides[0]
 
-            if index == 1:
-                slide = template_slide
-            else:
-                slide = self.duplicator.duplicate_slide(
-                    presentation,
-                    0
-                )
+        # Duplicate remaining groups
+        for _ in range(len(lesson.words) - 1):
 
-            print(f"Rendering slide #{index}")
-            print("Builder slide:", id(slide))
+            self.duplicator.duplicate_group(
+                presentation,
+                0,
+                4
+            )
+
+        # Render every word
+        for index, word in enumerate(lesson.words):
+
+            slides = self.manager.get_group(
+                presentation,
+                index
+            )
 
             self.renderer.render(
-                slide,
+                slides,
                 word,
-                index,
+                index + 1,
                 len(lesson.words)
             )
 
-        presentation.save(
-            output_path
-        )
+        presentation.save(output_path)
 
         print("Presentation created successfully!")
+
+        # for index, word in enumerate(lesson.words, start=1):
+
+        #     if index == 1:
+        #         slides = template_group
+        #     else:
+        #         slides = self.duplicator.duplicate_group(
+        #             presentation,
+        #             0,
+        #             4
+        #         )
+
+        #     print(f"Rendering word {index}")
+
+
+        #     self.renderer.render(
+        #         slides,
+        #         word,
+        #         index,
+        #         len(lesson.words)
+        #     )
+
+        # presentation.save(
+        #     output_path
+        # )
+
+        
