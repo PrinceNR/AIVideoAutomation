@@ -1,11 +1,11 @@
 from presentation.template_loader import TemplateLoader
 from presentation.slide_duplicator import SlideDuplicator
-from presentation.image_replacer import ImageReplacer
+from presentation.processors.image_processor import ImageProcessor
 from pathlib import Path
 
 loader = TemplateLoader()
 duplicator = SlideDuplicator()
-replacer = ImageReplacer()
+replacer = ImageProcessor()
 
 # presentation = loader.load("templates/vocabulary_template_v2.pptx")
 presentation = loader.load(

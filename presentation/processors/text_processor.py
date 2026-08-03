@@ -3,7 +3,7 @@ from pptx.slide import Slide
 
 
 
-class PlaceholderReplacer:
+class TextProcessor:
 
     
 

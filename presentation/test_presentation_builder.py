@@ -6,7 +6,7 @@ from utils.file_manager import FileManager
 file_manager = FileManager()
 
 lesson = file_manager.load_lesson(
-    Path("output/electronics/lesson.json")
+    Path("output/farming/lesson.json")
 )
 
 builder = PresentationBuilder()

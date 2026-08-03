@@ -1,10 +1,9 @@
 
 from pathlib import Path
-
 from pptx.enum.shapes import MSO_SHAPE_TYPE
 
 
-class ImageReplacer:
+class ImageProcessor:
 
     IMAGE_LEFT = 1223367
     IMAGE_TOP = 728662

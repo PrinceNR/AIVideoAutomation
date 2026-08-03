@@ -1,0 +1,135 @@
+{
+    "title": "",
+    "topic": "farming",
+    "words": [
+        {
+            "word": "cultivate",
+            "meaning": "To prepare and use land for growing crops or plants.",
+            "pronunciation": "/ˈkʌl.tɪ.veɪt/",
+            "part_of_speech": "verb",
+            "difficulty": "Intermediate",
+            "translations": {
+                "malayalam": "കൃഷിചെയ്യുക",
+                "tamil": "பயிரிடு",
+                "hindi": "जोतना"
+            },
+            "present_sentence": "Farmers cultivate the fertile soil every spring to prepare for planting crops.",
+            "past_sentence": "The local family cultivated organic vegetables on their small farm last year.",
+            "future_sentence": "Next season, our community will cultivate a large field of sweet corn.",
+            "base_form": "cultivate",
+            "present_form": "cultivates",
+            "past_form": "cultivated",
+            "synonyms": [
+                "farm",
+                "grow",
+                "till",
+                "foster",
+                "tend"
+            ],
+            "antonyms": [
+                "neglect",
+                "destroy",
+                "abandon",
+                "ignore"
+            ],
+            "image_keywords": [
+                "cultivate",
+                "farming",
+                "tractor",
+                "soil",
+                "agriculture"
+            ],
+            "search_query": "",
+            "image_folder": "output\\farming\\images\\cultivate",
+            "audio_folder": "output\\farming\\audio\\cultivate",
+            "default_audio": "output\\farming\\audio\\cultivate\\pronunciation.mp3",
+            "default_image": "output\\farming\\images\\cultivate\\001.jpg"
+        },
+        {
+            "word": "harvest",
+            "meaning": "To gather a ripe crop from the fields.",
+            "pronunciation": "/ˈhɑːr.vəst/",
+            "part_of_speech": "verb",
+            "difficulty": "Beginner",
+            "translations": {
+                "malayalam": "വിളവെടുക്കുക",
+                "tamil": "அறுவடை செய்",
+                "hindi": "फसल काटना"
+            },
+            "present_sentence": "Workers harvest fresh apples from the orchard early in the morning.",
+            "past_sentence": "The tired farmers harvested all the wheat before the heavy rain started.",
+            "future_sentence": "They will harvest the golden grain when it becomes completely ripe tomorrow.",
+            "base_form": "harvest",
+            "present_form": "harvests",
+            "past_form": "harvested",
+            "synonyms": [
+                "gather",
+                "reap",
+                "collect",
+                "pick",
+                "garner"
+            ],
+            "antonyms": [
+                "plant",
+                "sow",
+                "scatter",
+                "seed"
+            ],
+            "image_keywords": [
+                "harvest",
+                "wheat field",
+                "combine harvester",
+                "crops",
+                "farmer"
+            ],
+            "search_query": "",
+            "image_folder": "output\\farming\\images\\harvest",
+            "audio_folder": "output\\farming\\audio\\harvest",
+            "default_audio": "output\\farming\\audio\\harvest\\pronunciation.mp3",
+            "default_image": "output\\farming\\images\\harvest\\001.jpg"
+        },
+        {
+            "word": "irrigation",
+            "meaning": "The supply of water to land or crops to help growth.",
+            "pronunciation": "/ˌɪr.əˈɡeɪ.ʃən/",
+            "part_of_speech": "noun",
+            "difficulty": "Intermediate",
+            "translations": {
+                "malayalam": "ജലസേചനം",
+                "tamil": "பாசனம்",
+                "hindi": "सिंचाई"
+            },
+            "present_sentence": "Modern irrigation provides enough water for crops during dry weather conditions.",
+            "past_sentence": "The old irrigation system supplied water to all farms in the valley.",
+            "future_sentence": "A new irrigation project will help farmers grow crops during dry summer.",
+            "base_form": "",
+            "present_form": "",
+            "past_form": "",
+            "synonyms": [
+                "watering",
+                "soaking",
+                "flooding",
+                "hydration",
+                "sprinkling"
+            ],
+            "antonyms": [
+                "dehydration",
+                "drainage",
+                "dryness",
+                "drought"
+            ],
+            "image_keywords": [
+                "irrigation",
+                "water sprinkler",
+                "farm field",
+                "agriculture",
+                "water pipe"
+            ],
+            "search_query": "",
+            "image_folder": "output\\farming\\images\\irrigation",
+            "audio_folder": "output\\farming\\audio\\irrigation",
+            "default_audio": "output\\farming\\audio\\irrigation\\pronunciation.mp3",
+            "default_image": "output\\farming\\images\\irrigation\\001.jpg"
+        }
+    ]
+}
