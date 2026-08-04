@@ -8,10 +8,14 @@ class ImageProcessor:
     IMAGE_LEFT = 1223367
     IMAGE_TOP = 728662
 
-    def replace_image(
+    def process(
         self,
         slide,
-        image_path: Path
+        slide_definition,
+        word,
+        word_number,
+        total_words,
+        timeline
     ):
 
         picture = self._find_picture(slide)
@@ -31,7 +35,7 @@ class ImageProcessor:
 
         # Insert new image
         slide.shapes.add_picture(
-            str(image_path),
+            str(Path(word.default_image)),
             left,
             top,
             width,
@@ -42,16 +46,16 @@ class ImageProcessor:
 
         for i, shape in enumerate(slide.shapes):
 
-            if shape.shape_type == MSO_SHAPE_TYPE.PICTURE:
+            # if shape.shape_type == MSO_SHAPE_TYPE.PICTURE:
 
-                print(
-                    f"Picture {i}:",
-                    shape.name,
-                    shape.left,
-                    shape.top,
-                    shape.width,
-                    shape.height
-                )
+            #     print(
+            #         f"Picture {i}:",
+            #         # shape.name,
+            #         # shape.left,
+            #         # shape.top,
+            #         # shape.width,
+            #         shape.height
+            #     )
 
             # This is the vocabulary image
             if (
@@ -59,7 +63,7 @@ class ImageProcessor:
                 and shape.top == self.IMAGE_TOP
                 and shape.width == 3344465
             ):
-                print("Vocabulary image found!")
+                # print("Vocabulary image found!")
                 return shape
 
         print("No vocabulary picture found.")

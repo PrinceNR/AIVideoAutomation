@@ -1,0 +1,66 @@
+{
+    "template_name": "Vocabulary",
+
+    "slides_per_word": 4,
+
+    "slides": [
+
+        {
+            "type": "VOCABULARY",
+
+            "processors": [
+                "text",
+                "image",
+                "audio"
+            ],
+
+            "audio_sequence": [
+                "pronunciation",
+                "pronunciation",
+                "meaning"
+            ]
+        },
+
+        {
+            "type": "MEANING",
+
+             "processors": [
+                "text",
+                "image",
+                "audio"
+            ],
+
+            "audio_sequence": [
+                "present_sentence"
+            ]
+        },
+
+        {
+            "type": "PRESENT",
+
+             "processors": [
+                "text",
+                "image",
+                "audio"
+            ],
+
+            "audio_sequence": [
+                "present_sentence"
+            ]
+        },
+
+        {
+            "type": "FUTURE",
+
+            "processors": [
+                "text",
+                "image",
+                "audio"
+            ],
+
+            "audio_sequence": [
+                "future_sentence"
+            ]
+        }
+    ]
+}

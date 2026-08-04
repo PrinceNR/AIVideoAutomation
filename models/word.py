@@ -31,3 +31,19 @@ class Word:
 
     default_audio: str | None = None
     default_image: str | None = None
+
+
+    def get_audio(
+        self,
+        audio_name: str
+    ) -> Path | None:
+
+        if self.audio_folder is None:
+            return None
+
+        audio_path = Path(self.audio_folder) / f"{audio_name}.mp3"
+
+        if audio_path.exists():
+            return audio_path
+
+        return None

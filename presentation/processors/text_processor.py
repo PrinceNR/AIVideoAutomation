@@ -5,14 +5,14 @@ from pptx.slide import Slide
 
 class TextProcessor:
 
-    
-
-    def replace_word(
+    def process(
         self,
-        slide: Slide,
-        word: Word,
-        word_number: int,
-        total_words: int
+        slide,
+        slide_definition,
+        word,
+        word_number,
+        total_words,
+        timeline
     ):
 
         placeholders = self._get_word_placeholders(
@@ -79,7 +79,7 @@ class TextProcessor:
 
                     if placeholder in run.text:
 
-                        print(f"Replacing {placeholder} -> {value}")
+                        # print(f"Replacing {placeholder} -> {value}")
 
                         run.text = run.text.replace(
                             placeholder,
