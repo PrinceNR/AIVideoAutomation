@@ -28,12 +28,25 @@ class SlideTimeline:
         duration: float
     ):
 
-        self.audio_events.append(
+        start_time = self.current_time
 
-            AudioEvent(
-                file=file,
-                start_time=self.current_time
-            )
-
+        event = AudioEvent(
+            file=file,
+            start_time=start_time
         )
+
+        self.audio_events.append(event)
+
         self.current_time += duration
+
+        return event
+
+        # self.audio_events.append(
+
+        #     AudioEvent(
+        #         file=file,
+        #         start_time=self.current_time
+        #     )
+
+        # )
+        # self.current_time += duration

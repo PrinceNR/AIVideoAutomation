@@ -3,6 +3,7 @@ from presentation.slide_group_renderer import SlideGroupRenderer
 from presentation.slide_group_duplicator import SlideGroupDuplicator
 from presentation.slide_group_manager import SlideGroupManager
 from presentation.template_definition_loader import TemplateDefinitionLoader
+from presentation.postprocessor.pptx_post_processor import PptxPostProcessor
 
 
 class PresentationBuilder:
@@ -13,7 +14,8 @@ class PresentationBuilder:
         self.duplicator = SlideGroupDuplicator()
         self.renderer = SlideGroupRenderer() 
         self.manager = SlideGroupManager()   
-        self.template_loader = TemplateDefinitionLoader() 
+        self.template_loader = TemplateDefinitionLoader()
+        self.post_processor = PptxPostProcessor() 
 
     def build(
         self,
@@ -59,6 +61,9 @@ class PresentationBuilder:
             )
 
         presentation.save(output_path)
+        self.post_processor.process(
+            output_path
+        )
 
         print("Presentation created successfully!")
 
