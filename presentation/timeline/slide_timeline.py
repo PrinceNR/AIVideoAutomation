@@ -9,6 +9,8 @@ class AudioEvent:
 
     start_time: float
 
+    duration: float
+
 
 @dataclass
 class SlideTimeline:
@@ -32,7 +34,8 @@ class SlideTimeline:
 
         event = AudioEvent(
             file=file,
-            start_time=start_time
+            start_time=start_time,
+            duration=duration
         )
 
         self.audio_events.append(event)
