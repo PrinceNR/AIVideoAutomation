@@ -1,16 +1,4 @@
-# class AudioController:
-#     """
-#     Handles all audio operations on a PowerPoint presentation.
-#     """
 
-#     def __init__(self, presentation):
-#         self.presentation = presentation
-
-#     def slide(self, index: int):
-#         """
-#         Return a slide object.
-#         """
-#         return self.presentation.Slides(index)
 
 class AudioController:
 
