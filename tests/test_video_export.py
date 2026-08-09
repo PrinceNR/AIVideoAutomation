@@ -7,7 +7,7 @@ def main():
 
     exporter.export(
         pptx_path="research/audio_full_test.pptx",
-        output_video="research/audio_full_test.mp4",
+        output_video="research/audio_full_test_1.mp4",
     )
 
 
