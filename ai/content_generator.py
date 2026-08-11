@@ -22,8 +22,4 @@ def generate_vocabulary(topic, count):
 
     lesson = LessonMapper.from_dict(data)
 
-    return lesson
-
-    # text = response.text.strip()
-
-    # return json.loads(text)
+    return lesson 
