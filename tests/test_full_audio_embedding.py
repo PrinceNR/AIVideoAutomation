@@ -1,12 +1,12 @@
 from pathlib import Path
 from utils.file_manager import FileManager
 from presentation.presentation_builder import PresentationBuilder
-from presentation.audio_presentation_processor import (
-    AudioPresentationProcessor
-)
-from presentation.template_definition_loader import (
-    TemplateDefinitionLoader
-)
+# from presentation.audio_presentation_processor import (
+#     AudioPresentationProcessor
+# )
+# from presentation.template_definition_loader import (
+#     TemplateDefinitionLoader
+# )
 
 # Import however your project currently loads Lesson.
 # If your existing test already has a Lesson object,
@@ -42,28 +42,31 @@ def main():
         output_path=output_path
     )
 
-    print("\nBase presentation created.")
-
-    template_definition_loader = (
-        TemplateDefinitionLoader()
-    )
-
-    template_definition = (
-        template_definition_loader.load(
-            "templates/vocabulary/template_definition.json"
-        )
-    )
-
-    audio_processor = AudioPresentationProcessor()
-
-    audio_processor.process(
-        pptx_path=output_path,
-        lesson=lesson,
-        template_definition=template_definition
-    )
-
-    print("\nFinal audio presentation:")
+    print("\nFinal presentation:")
     print(output_path)
+
+    # print("\nBase presentation created.")
+
+    # template_definition_loader = (
+    #     TemplateDefinitionLoader()
+    # )
+
+    # template_definition = (
+    #     template_definition_loader.load(
+    #         "templates/vocabulary/template_definition.json"
+    #     )
+    # )
+
+    # audio_processor = AudioPresentationProcessor()
+
+    # audio_processor.process(
+    #     pptx_path=output_path,
+    #     lesson=lesson,
+    #     template_definition=template_definition
+    # )
+
+    # print("\nFinal audio presentation:")
+    # print(output_path)
 
 
 if __name__ == "__main__":

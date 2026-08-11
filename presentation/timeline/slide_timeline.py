@@ -4,7 +4,6 @@ from pathlib import Path
 
 @dataclass
 class AudioEvent:
-
     file: Path
     start_time: float
     duration: float
@@ -17,9 +16,14 @@ class SlideTimeline:
         default_factory=list
     )
 
-    current_time: float = 0.5
+    initial_delay: float = 0.5
 
     audio_gap: float = 0.3
+
+    current_time: float = field(init=False)
+
+    def __post_init__(self):
+        self.current_time = self.initial_delay
 
     @property
     def duration(self) -> float:

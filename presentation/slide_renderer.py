@@ -16,7 +16,18 @@ class SlideRenderer:
         word_number,
         total_words
     ):
-        timeline = SlideTimeline()
+        timeline = SlideTimeline(
+            initial_delay=(
+                slide_definition.audio.initial_delay
+                if slide_definition.audio
+                else 0.5
+            ),
+            audio_gap=(
+                slide_definition.audio.gap
+                if slide_definition.audio
+                else 0.3
+            )
+        )
 
         print(f"Rendering {slide_definition.type}")
 
@@ -51,3 +62,4 @@ class SlideRenderer:
             ),
             "seconds"
         )
+        return timeline

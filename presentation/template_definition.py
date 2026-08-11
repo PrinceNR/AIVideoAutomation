@@ -2,6 +2,16 @@ from dataclasses import dataclass
 
 
 @dataclass
+class AudioConfiguration:
+
+    sequence: list[str]
+
+    initial_delay: float = 0.5
+
+    gap: float = 0.3
+
+
+@dataclass
 class SlideDefinition:
 
     type: str
@@ -10,7 +20,7 @@ class SlideDefinition:
 
     image: str | None = None
 
-    audio_sequence: list[str] | None = None
+    audio: AudioConfiguration | None = None
 
 
 @dataclass

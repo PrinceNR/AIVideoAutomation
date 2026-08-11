@@ -118,12 +118,78 @@
 # print(json.dumps(data, indent=4, ensure_ascii=False))
 
 
+# from pipeline.vocabulary_pipeline import VocabularyPipeline
+
+# topic = input("Topic: ")
+
+# count = int(input("Number of words: "))
+
+# pipeline = VocabularyPipeline()
+
+# pipeline.run(topic, count)
+
+
 from pipeline.vocabulary_pipeline import VocabularyPipeline
+from pipeline.presentation_pipeline import PresentationPipeline
+from pipeline.video_pipeline import VideoPipeline
 
-topic = input("Topic: ")
 
-count = int(input("Number of words: "))
+def main():
 
-pipeline = VocabularyPipeline()
+    print("\n========================================")
+    print("VOCABULARY VIDEO AUTOMATION")
+    print("========================================")
 
-pipeline.run(topic, count)
+    topic = input("Enter topic: ").strip()
+
+    count = int(
+        input("Enter number of words: ")
+    )
+
+    print("\nStarting full pipeline...")
+
+    # ---------------------------------------------
+    # Stage 1
+    # Lesson + Images + Audio
+    # ---------------------------------------------
+
+    vocabulary_pipeline = VocabularyPipeline()
+
+    vocabulary_pipeline.run(
+        topic=topic,
+        count=count
+    )
+
+    # ---------------------------------------------
+    # Stage 2
+    # Presentation
+    # ---------------------------------------------
+
+    presentation_pipeline = PresentationPipeline()
+
+    presentation_path = presentation_pipeline.run()
+
+    # ---------------------------------------------
+    # Stage 3
+    # Video
+    # ---------------------------------------------
+
+    video_pipeline = VideoPipeline()
+
+    video_path = video_pipeline.run()
+
+    # ---------------------------------------------
+    # Completed
+    # ---------------------------------------------
+
+    print("\n========================================")
+    print("FULL PIPELINE COMPLETED")
+    print("========================================")
+
+    print(f"Topic: {topic}")
+    print(f"Presentation: {presentation_path}")
+    print(f"Video: {video_path}")
+
+
+if __name__ == "__main__":
+    main()

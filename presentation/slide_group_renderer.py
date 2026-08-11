@@ -16,15 +16,20 @@ class SlideGroupRenderer:
         total_words
     ):
 
+        timelines = []
+
         for slide, definition in zip(
             slides,
             slide_definitions
         ):
 
-            self.slide_renderer.render(
+            timeline = self.slide_renderer.render(
                 slide,
                 definition,
                 word,
                 word_number,
                 total_words
             )
+            timelines.append(timeline)
+
+        return timelines

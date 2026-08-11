@@ -1,10 +1,8 @@
 {
     "template_name": "Vocabulary",
-
     "slides_per_word": 4,
 
     "slides": [
-
         {
             "type": "VOCABULARY",
 
@@ -14,39 +12,51 @@
                 "audio"
             ],
 
-            "audio_sequence": [
-                "pronunciation",
-                "pronunciation",
-                "meaning"
-            ]
+            "audio": {
+                "sequence": [
+                    "pronunciation",
+                    "pronunciation",
+                    "meaning"
+                ],
+                "initial_delay": 0.5,
+                "gap": 0.3
+            }
         },
 
         {
             "type": "MEANING",
 
-             "processors": [
+            "processors": [
                 "text",
                 "image",
                 "audio"
             ],
 
-            "audio_sequence": [
-                "past_sentence"
-            ]
+            "audio": {
+                "sequence": [
+                    "past_sentence"
+                ],
+                "initial_delay": 0.5,
+                "gap": 0.3
+            }
         },
 
         {
             "type": "PRESENT",
 
-             "processors": [
+            "processors": [
                 "text",
                 "image",
                 "audio"
             ],
 
-            "audio_sequence": [
-                "present_sentence"
-            ]
+            "audio": {
+                "sequence": [
+                    "present_sentence"
+                ],
+                "initial_delay": 0.5,
+                "gap": 0.3
+            }
         },
 
         {
@@ -58,9 +68,13 @@
                 "audio"
             ],
 
-            "audio_sequence": [
-                "future_sentence"
-            ]
+            "audio": {
+                "sequence": [
+                    "future_sentence"
+                ],
+                "initial_delay": 0.5,
+                "gap": 0.3
+            }
         }
     ]
 }

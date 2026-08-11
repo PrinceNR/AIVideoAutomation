@@ -1,0 +1,89 @@
+{
+    "title": "",
+    "topic": "School students",
+    "words": [
+        {
+            "word": "Classmate",
+            "meaning": "A member of the same class in a school.",
+            "pronunciation": "/ˈklæs.meɪt/",
+            "part_of_speech": "Noun",
+            "difficulty": "Beginner",
+            "translations": {
+                "malayalam": "സഹപാഠി",
+                "tamil": "வகுப்புத்தோழர்",
+                "hindi": "सहपाठी"
+            },
+            "present_sentence": "My classmate always helps me solve difficult math problems during lunch break.",
+            "past_sentence": "Yesterday, my classmate shared her delicious lunch with everyone at our table.",
+            "future_sentence": "My classmate will present our science project to the whole school tomorrow.",
+            "base_form": "",
+            "present_form": "",
+            "past_form": "",
+            "synonyms": [
+                "peer",
+                "schoolmate",
+                "classfellow",
+                "fellow student"
+            ],
+            "antonyms": [
+                "stranger",
+                "teacher",
+                "instructor"
+            ],
+            "image_keywords": [
+                "classmate",
+                "students",
+                "classroom",
+                "school friends",
+                "education"
+            ],
+            "search_query": "",
+            "image_folder": "output\\school_students\\images\\classmate",
+            "audio_folder": "output\\school_students\\audio\\classmate",
+            "default_audio": "output\\school_students\\audio\\classmate\\pronunciation.mp3",
+            "default_image": "output\\school_students\\images\\classmate\\001.jpg"
+        },
+        {
+            "word": "Study",
+            "meaning": "To devote time and attention to acquiring knowledge on a subject.",
+            "pronunciation": "/ˈstʌd.i/",
+            "part_of_speech": "Verb",
+            "difficulty": "Beginner",
+            "translations": {
+                "malayalam": "പഠിക്കുക",
+                "tamil": "படி",
+                "hindi": "पढ़ना"
+            },
+            "present_sentence": "Many students study quietly in the library before their final exams start.",
+            "past_sentence": "The diligent students studied all night to pass their difficult history test.",
+            "future_sentence": "The primary students will study new science topics together next week.",
+            "base_form": "study",
+            "present_form": "studies",
+            "past_form": "studied",
+            "synonyms": [
+                "learn",
+                "examine",
+                "read",
+                "memorize",
+                "revise"
+            ],
+            "antonyms": [
+                "ignore",
+                "neglect",
+                "forget"
+            ],
+            "image_keywords": [
+                "students studying",
+                "library",
+                "books",
+                "school",
+                "learning"
+            ],
+            "search_query": "",
+            "image_folder": "output\\school_students\\images\\study",
+            "audio_folder": "output\\school_students\\audio\\study",
+            "default_audio": "output\\school_students\\audio\\study\\pronunciation.mp3",
+            "default_image": "output\\school_students\\images\\study\\001.jpg"
+        }
+    ]
+}

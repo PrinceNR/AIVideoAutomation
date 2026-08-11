@@ -1,4 +1,3 @@
-
 from pathlib import Path
 
 
@@ -13,13 +12,12 @@ class AudioEmbedder:
         audio_path: Path,
         start_time: float = 0.0,
         duration: float = 0.0,
-        delay: float = 0.3
+        delay: float = 0.0
     ):
 
         audio_path = Path(audio_path).resolve()
 
         if not audio_path.exists():
-
             raise FileNotFoundError(
                 f"Audio file not found: {audio_path}"
             )
@@ -65,7 +63,7 @@ class AudioEmbedder:
             self.MEDIA_PLAY_EFFECT
         )
 
-        # Play after previous animation/audio.
+        # Play after previous audio.
         effect.Timing.TriggerType = self.AFTER_PREVIOUS
 
         # Delay before this audio starts.
@@ -76,18 +74,15 @@ class AudioEmbedder:
 
         # Make sure media plays when effect starts.
         try:
-
             effect.EffectInformation.PlaySettings.PlayOnEntry = True
-
         except Exception:
-
             pass
 
         # ---------------------------------------------------------
         # 3. Debug information
         # ---------------------------------------------------------
 
-        actual_start_time = start_time + delay
+        actual_start_time = start_time
 
         print(
             "  Animation effect created"

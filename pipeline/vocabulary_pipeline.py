@@ -56,3 +56,18 @@ class VocabularyPipeline:
         
 
         print("\nPipeline completed successfully!")
+
+if __name__ == "__main__":
+
+    pipeline = VocabularyPipeline()
+
+    topic = input("Enter topic: ").strip()
+
+    count = int(
+        input("Enter number of words: ")
+    )
+
+    pipeline.run(
+        topic=topic,
+        count=count
+    )

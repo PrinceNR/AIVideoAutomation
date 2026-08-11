@@ -3,6 +3,7 @@ import json
 from presentation.template_definition import (
     TemplateDefinition,
     SlideDefinition,
+    AudioConfiguration,
 )
 
 
@@ -18,6 +19,27 @@ class TemplateDefinitionLoader:
 
         for slide in data["slides"]:
 
+            audio_config = None
+
+            if "audio" in slide:
+
+                audio_data = slide["audio"]
+
+                audio_config = AudioConfiguration(
+                    sequence=audio_data.get(
+                        "sequence",
+                        []
+                    ),
+                    initial_delay=audio_data.get(
+                        "initial_delay",
+                        0.5
+                    ),
+                    gap=audio_data.get(
+                        "gap",
+                        0.3
+                    )
+                )
+
             slides.append(
 
                 SlideDefinition(
@@ -28,10 +50,8 @@ class TemplateDefinitionLoader:
 
                     image=slide.get("image"),
 
-                    audio_sequence=slide.get("audio_sequence", [])
-
+                    audio=audio_config
                 )
-
             )
 
         return TemplateDefinition(
