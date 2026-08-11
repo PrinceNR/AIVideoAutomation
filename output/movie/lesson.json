@@ -1,0 +1,48 @@
+{
+    "title": "",
+    "topic": "movie",
+    "words": [
+        {
+            "word": "premiere",
+            "meaning": "To show or perform a movie for the first time.",
+            "pronunciation": "/ˈprɛm.i.ɛər/",
+            "part_of_speech": "verb",
+            "difficulty": "Intermediate",
+            "translations": {
+                "malayalam": "പ്രഥമപ്രദർശനം",
+                "tamil": "முதற்காட்சி",
+                "hindi": "प्रीमियर"
+            },
+            "present_sentence": "The new action movie premieres in theaters across the country tonight.",
+            "past_sentence": "The director's latest film premiered at the international festival last night.",
+            "future_sentence": "The highly anticipated superhero movie will premiere in major cities next month.",
+            "base_form": "premiere",
+            "present_form": "premieres",
+            "past_form": "premiered",
+            "synonyms": [
+                "debut",
+                "launch",
+                "open",
+                "unveil"
+            ],
+            "antonyms": [
+                "close",
+                "conclude",
+                "end",
+                "withdraw"
+            ],
+            "image_keywords": [
+                "movie premiere",
+                "red carpet",
+                "cinema",
+                "film festival",
+                "hollywood"
+            ],
+            "search_query": "",
+            "image_folder": "output\\movie\\images\\premiere",
+            "audio_folder": "output\\movie\\audio\\premiere",
+            "default_audio": "output\\movie\\audio\\premiere\\pronunciation.mp3",
+            "default_image": "output\\movie\\images\\premiere\\001.jpg"
+        }
+    ]
+}

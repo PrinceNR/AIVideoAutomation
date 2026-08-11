@@ -1,1 +1,3 @@
 .env
+credentials/youtube_client_secret.json
+credentials/youtube_token.json

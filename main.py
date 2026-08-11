@@ -1,6 +1,7 @@
 from pipeline.vocabulary_pipeline import VocabularyPipeline
 from pipeline.presentation_pipeline import PresentationPipeline
 from pipeline.video_pipeline import VideoPipeline
+from pipeline.thumbnail_pipeline import ThumbnailPipeline
 
 
 def main():
@@ -52,6 +53,17 @@ def main():
     )
 
     # ---------------------------------------------
+    # Stage 4
+    # Thumbnail
+    # ---------------------------------------------
+
+    thumbnail_pipeline = ThumbnailPipeline()
+
+    thumbnail_path = thumbnail_pipeline.run(
+        lesson_path=lesson_path
+    )
+
+    # ---------------------------------------------
     # Completed
     # ---------------------------------------------
 
@@ -63,6 +75,7 @@ def main():
     print(f"Lesson: {lesson_path}")
     print(f"Presentation: {presentation_path}")
     print(f"Video: {video_path}")
+    print(f"Thumbnail: {thumbnail_path}")
 
 
 if __name__ == "__main__":
