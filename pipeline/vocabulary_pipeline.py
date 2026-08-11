@@ -57,6 +57,8 @@ class VocabularyPipeline:
 
         print("\nPipeline completed successfully!")
 
+        return lesson_path
+
 if __name__ == "__main__":
 
     pipeline = VocabularyPipeline()
