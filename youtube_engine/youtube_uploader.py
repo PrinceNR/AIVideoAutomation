@@ -6,6 +6,13 @@ from googleapiclient.errors import HttpError
 
 from youtube_engine.youtube_auth import YouTubeAuth
 
+from config import (
+    YOUTUBE_PRIVACY_STATUS,
+    YOUTUBE_MADE_FOR_KIDS,
+    YOUTUBE_CATEGORY_ID,
+    YOUTUBE_NOTIFY_SUBSCRIBERS,
+)
+
 
 class YouTubeUploader:
 
@@ -20,8 +27,10 @@ class YouTubeUploader:
         video_path,
         thumbnail_path,
         metadata,
-        privacy_status="private"
+        privacy_status= None
     ):
+        if privacy_status is None:
+            privacy_status = YOUTUBE_PRIVACY_STATUS
 
         video_path = Path(video_path).resolve()
         thumbnail_path = Path(thumbnail_path).resolve()
@@ -102,15 +111,14 @@ class YouTubeUploader:
                 "title": title,
                 "description": description,
                 "tags": tags,
-                "categoryId": self.CATEGORY_ID
+                "categoryId": YOUTUBE_CATEGORY_ID
             },
 
             "status": {
                 "privacyStatus": privacy_status,
-                "selfDeclaredMadeForKids": False
+                "selfDeclaredMadeForKids": YOUTUBE_MADE_FOR_KIDS
             }
         }
-
         # -----------------------------------------
         # Video media
         # -----------------------------------------
@@ -130,7 +138,7 @@ class YouTubeUploader:
             part="snippet,status",
             body=body,
             media_body=media,
-            notifySubscribers=False
+            notifySubscribers=YOUTUBE_NOTIFY_SUBSCRIBERS
         )
 
         print("\n========================================")

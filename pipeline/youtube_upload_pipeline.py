@@ -14,7 +14,10 @@ class YouTubeUploadPipeline:
 
     def run(
         self,
-        lesson_path=None
+        lesson_path=None,
+        video_path=None,
+        thumbnail_path=None,
+        metadata_path=None
     ):
 
         print("\n========================================")
@@ -77,11 +80,27 @@ class YouTubeUploadPipeline:
         # Video
         # -----------------------------------------
 
-        video_path = (
-            lesson_folder
-            / "video"
-            / f"{topic}.mp4"
-        )
+        if video_path is not None:
+
+            video_path = Path(video_path)
+
+            print(
+                f"Using video: {video_path}"
+            )
+
+        else:
+
+            video_path = (
+                lesson_folder
+                / "video"
+                / f"{topic}.mp4"
+            )
+
+        # video_path = (
+        #     lesson_folder
+        #     / "video"
+        #     / f"{topic}.mp4"
+        # )
 
         if not video_path.exists():
 
@@ -95,11 +114,30 @@ class YouTubeUploadPipeline:
         # Thumbnail
         # -----------------------------------------
 
-        thumbnail_path = (
-            lesson_folder
-            / "thumbnail"
-            / f"{topic}_thumbnail.png"
-        )
+        if thumbnail_path is not None:
+
+            thumbnail_path = Path(
+                thumbnail_path
+            )
+
+            print(
+                f"Using thumbnail: "
+                f"{thumbnail_path}"
+            )
+
+        else:
+
+            thumbnail_path = (
+                lesson_folder
+                / "thumbnail"
+                / f"{topic}_thumbnail.png"
+            )
+
+        # thumbnail_path = (
+        #     lesson_folder
+        #     / "thumbnail"
+        #     / f"{topic}_thumbnail.png"
+        # )
 
         if not thumbnail_path.exists():
 
@@ -113,11 +151,30 @@ class YouTubeUploadPipeline:
         # Metadata
         # -----------------------------------------
 
-        metadata_path = (
-            lesson_folder
-            / "youtube"
-            / "metadata.json"
-        )
+        if metadata_path is not None:
+
+            metadata_path = Path(
+                metadata_path
+            )
+
+            print(
+                f"Using metadata: "
+                f"{metadata_path}"
+            )
+
+        else:
+
+            metadata_path = (
+                lesson_folder
+                / "youtube"
+                / "metadata.json"
+            )
+
+        # metadata_path = (
+        #     lesson_folder
+        #     / "youtube"
+        #     / "metadata.json"
+        # )
 
         if not metadata_path.exists():
 
@@ -166,8 +223,7 @@ class YouTubeUploadPipeline:
         result = self.uploader.upload(
             video_path=video_path,
             thumbnail_path=thumbnail_path,
-            metadata=metadata,
-            privacy_status="private"
+            metadata=metadata
         )
 
         # -----------------------------------------

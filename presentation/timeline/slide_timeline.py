@@ -1,5 +1,9 @@
 from dataclasses import dataclass, field
 from pathlib import Path
+from config import (
+    AUDIO_INITIAL_DELAY,
+    AUDIO_GAP,
+)
 
 
 @dataclass
@@ -16,9 +20,8 @@ class SlideTimeline:
         default_factory=list
     )
 
-    initial_delay: float = 0.5
-
-    audio_gap: float = 0.3
+    initial_delay: float = AUDIO_INITIAL_DELAY
+    audio_gap: float = AUDIO_GAP
 
     current_time: float = field(init=False)
 

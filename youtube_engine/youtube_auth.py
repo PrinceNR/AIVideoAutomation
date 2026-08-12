@@ -5,6 +5,11 @@ from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 
+from config import (
+    YOUTUBE_CLIENT_SECRET_PATH,
+    YOUTUBE_TOKEN_PATH,
+)
+
 
 class YouTubeAuth:
 
@@ -16,11 +21,11 @@ class YouTubeAuth:
     def __init__(self):
 
         self.client_secret_path = Path(
-            "credentials/youtube_client_secret.json"
+            YOUTUBE_CLIENT_SECRET_PATH
         )
 
         self.token_path = Path(
-            "credentials/youtube_token.json"
+            YOUTUBE_TOKEN_PATH
         )
 
     def authenticate(self):

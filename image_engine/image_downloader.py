@@ -2,6 +2,7 @@ from pathlib import Path
 from image_engine.pexels_client import PexelsClient
 from models.word import Word
 from config import IMAGE_COUNT
+from config import IMAGE_FORMAT
 
 
 class ImageDownloader:
@@ -29,7 +30,7 @@ class ImageDownloader:
 
         for index, image_url in enumerate(images, start=1):
 
-            filename = f"{index:03}.jpg"
+            filename = f"{index:03}.{IMAGE_FORMAT}"
 
             self.client.download_image(
                 image_url,

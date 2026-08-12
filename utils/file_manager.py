@@ -3,11 +3,12 @@ import json
 import re
 from models.lesson import Lesson
 from models.lesson_mapper import LessonMapper
+from config import OUTPUT_FOLDER
 
 class FileManager:
 
     def __init__(self):
-        self.output_folder = Path("output")
+        self.output_folder = Path(OUTPUT_FOLDER)
         self.output_folder.mkdir(exist_ok=True)
 
     def make_folder_name(self, text: str) -> str:

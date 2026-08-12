@@ -10,6 +10,12 @@ from thumbnail_engine.thumbnail_png_exporter import (
     ThumbnailPngExporter
 )
 
+from config import (
+    THUMBNAIL_TEMPLATE_PATH,
+    THUMBNAIL_WIDTH,
+    THUMBNAIL_HEIGHT,
+)
+
 class ThumbnailPipeline:
 
     def __init__(self):
@@ -102,10 +108,13 @@ class ThumbnailPipeline:
         # Template
         # -----------------------------------------
 
+        # template_path = Path(
+        #     "templates/"
+        #     "thumbnail/"
+        #     "thumbnail_template.pptx"
+        # )
         template_path = Path(
-            "templates/"
-            "thumbnail/"
-            "thumbnail_template.pptx"
+            THUMBNAIL_TEMPLATE_PATH
         )
 
         if not template_path.exists():
@@ -163,11 +172,18 @@ class ThumbnailPipeline:
         # Export PNG
         # =========================================
 
+        # self.png_exporter.export(
+        #     pptx_path=pptx_output,
+        #     output_path=png_output,
+        #     width=1280,
+        #     height=720
+        # )
+
         self.png_exporter.export(
             pptx_path=pptx_output,
             output_path=png_output,
-            width=1280,
-            height=720
+            width=THUMBNAIL_WIDTH,
+            height=THUMBNAIL_HEIGHT
         )
 
         # -----------------------------------------

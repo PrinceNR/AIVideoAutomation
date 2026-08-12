@@ -4,11 +4,12 @@ import tempfile
 
 from PIL import Image, ImageOps
 from pptx import Presentation
+from config import THUMBNAIL_MAX_WORDS
 
 
 class ThumbnailPptxGenerator:
 
-    MAX_WORDS = 8
+    
 
     def generate(
         self,
@@ -40,13 +41,13 @@ class ThumbnailPptxGenerator:
             f"Words available: {len(lesson.words)}"
         )
 
-        words = lesson.words[:self.MAX_WORDS]
+        words = lesson.words[:THUMBNAIL_MAX_WORDS]
 
         with tempfile.TemporaryDirectory() as temp_dir:
 
             temp_dir = Path(temp_dir)
 
-            for index in range(1, self.MAX_WORDS + 1):
+            for index in range(1, THUMBNAIL_MAX_WORDS + 1):
 
                 image_placeholder = self._find_shape(
                     slide,

@@ -1,6 +1,7 @@
 from pathlib import Path
 from presentation.presentation_builder import PresentationBuilder
 from utils.file_manager import FileManager
+from config import PRESENTATION_TEMPLATE_PATH
 
 
 class PresentationPipeline:
@@ -59,7 +60,7 @@ class PresentationPipeline:
         # -------------------------------------------------
 
         template_path = Path(
-            "templates/vocabulary_template_v2.pptx"
+            PRESENTATION_TEMPLATE_PATH
         )
 
         if not template_path.exists():

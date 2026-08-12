@@ -5,6 +5,10 @@ from presentation.template_definition import (
     SlideDefinition,
     AudioConfiguration,
 )
+from config import (
+    AUDIO_INITIAL_DELAY,
+    AUDIO_GAP,
+)
 
 
 class TemplateDefinitionLoader:
@@ -30,13 +34,15 @@ class TemplateDefinitionLoader:
                         "sequence",
                         []
                     ),
+
                     initial_delay=audio_data.get(
                         "initial_delay",
-                        0.5
+                        AUDIO_INITIAL_DELAY
                     ),
+
                     gap=audio_data.get(
                         "gap",
-                        0.3
+                        AUDIO_GAP
                     )
                 )
 
