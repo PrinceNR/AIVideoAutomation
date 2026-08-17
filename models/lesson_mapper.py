@@ -9,7 +9,8 @@ class LessonMapper:
     def to_dict(lesson: Lesson) -> dict:
 
         return asdict(lesson)
-    
+
+    @staticmethod
     def from_dict(data: dict) -> Lesson:
 
         words = []
@@ -40,11 +41,25 @@ class LessonMapper:
                 image_keywords=item.get("image_keywords", []),
                 search_query=item.get("search_query", ""),
 
+                video_search_queries=item.get("video_search_queries",[]),
+
                 image_folder=item.get("image_folder"),
                 audio_folder=item.get("audio_folder"),
 
                 default_image=item.get("default_image"),
                 default_audio=item.get("default_audio"),
+
+                preferred_media=item.get("preferred_media"),
+
+                media_reason=item.get("media_reason"),
+
+                requires_motion=item.get("requires_motion",False),
+
+                media_type=item.get("media_type"),
+
+                video_folder=item.get("video_folder"),
+
+                default_video=item.get("default_video"),
             )
 
 
@@ -53,6 +68,7 @@ class LessonMapper:
         return Lesson(
             title=data.get("title", ""),
             topic=data.get("topic", ""),
+            suggestions=data.get("suggestions", ""),
             words=words,
         )
 

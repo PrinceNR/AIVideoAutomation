@@ -1,4 +1,18 @@
 .env
+.env.*
+!.env.example
+credentials/
 credentials/youtube_client_secret.json
 credentials/youtube_token.json
-config.py
+
+
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Generated project files
+output/

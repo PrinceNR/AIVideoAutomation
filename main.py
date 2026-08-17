@@ -93,6 +93,8 @@ def main():
         input("Enter number of words: ")
     )
 
+    suggestions = input("Enter the suggestions for the video: ").strip()
+
     print("\nStarting full pipeline...")
 
     # ---------------------------------------------
@@ -104,7 +106,8 @@ def main():
 
     lesson_path = vocabulary_pipeline.run(
         topic=topic,
-        count=count
+        count=count,
+        suggestions=suggestions
     )
 
     # ---------------------------------------------

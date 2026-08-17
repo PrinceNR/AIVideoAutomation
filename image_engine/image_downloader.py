@@ -1,46 +1,183 @@
 from pathlib import Path
-from image_engine.pexels_client import PexelsClient
+import json
 from models.word import Word
 from config import IMAGE_COUNT
-from config import IMAGE_FORMAT
+from image_engine.image_fallback_service import ImageFallbackService
+
 
 
 class ImageDownloader:
 
     def __init__(self):
 
-        self.client = PexelsClient()
-
+        self.fallback_service = ImageFallbackService()
     def download_word_images(
         self,
         word: Word,
         lesson_folder: Path,
-        per_page: int = IMAGE_COUNT
+        per_source: int = IMAGE_COUNT
     ):
 
-        
-        images = self.client.search(word, per_page)
-
-        image_folder = lesson_folder / "images" / word.word.lower()
+        image_folder = (
+            lesson_folder
+            / "images"
+            / word.word.lower()
+        )
 
         image_folder.mkdir(
             parents=True,
             exist_ok=True
         )
 
-        for index, image_url in enumerate(images, start=1):
+        word.image_folder = str(
+            image_folder
+        )
 
-            filename = f"{index:03}.{IMAGE_FORMAT}"
+        print(
+            f"\nProcessing images for: "
+            f"{word.word}"
+        )
 
-            self.client.download_image(
-                image_url,
-                image_folder / filename
+        result = (
+            self.fallback_service.select(
+                word=word,
+                image_folder=image_folder,
+                per_source=per_source
             )
-            # Save the folder location
-            # word.image_folder = str(image_folder)
-            # word.image_path = str(image_folder / "001.jpg")
+        )
 
-        word.image_folder = str(image_folder)
-        word.default_image = str(image_folder / "001.jpg")
+        # =============================================
+        # SAVE FULL SEARCH / VERIFICATION REPORT
+        # =============================================
 
-        print(f"Finished downloading images for {word.word}")
+        report_path = (
+            image_folder
+            / "image_selection_report.json"
+        )
+
+        with open(
+            report_path,
+            "w",
+            encoding="utf-8"
+        ) as file:
+
+            json.dump(
+                result,
+                file,
+                ensure_ascii=False,
+                indent=4
+            )
+
+        status = result.get(
+            "status"
+        )
+
+        # =============================================
+        # SUCCESS
+        # =============================================
+
+        if status == "selected":
+
+            selected_image = (
+                result.get(
+                    "selected_image"
+                )
+            )
+
+            selected_score = (
+                result.get(
+                    "selected_score",
+                    0
+                )
+            )
+
+            selected_query = (
+                result.get(
+                    "selected_query"
+                )
+            )
+            selected_type = (
+                result.get(
+                    "candidate_type"
+                )
+            )
+
+            selected_path = (
+                image_folder
+                / selected_image
+            )
+
+            word.default_image = str(
+                selected_path
+            )
+
+            word.media_type = (
+                selected_type
+            )
+
+            print(
+                f"\nSelected image: "
+                f"{selected_image}"
+            )
+
+            print(
+                f"Image score: "
+                f"{selected_score}"
+            )
+
+            print(
+                f"Media type: "
+                f"{selected_type}"
+            )
+
+            print(
+                f"Successful query: "
+                f"{selected_query}"
+            )
+
+        # =============================================
+        # GEMINI TEMPORARILY UNAVAILABLE
+        # =============================================
+
+        elif (
+            status
+            == "verification_unavailable"
+        ):
+
+            word.default_image = None
+            word.media_type = None
+
+            print(
+                f"\nImage verification "
+                f"temporarily unavailable "
+                f"for {word.word}."
+            )
+
+            print(
+                "Candidate images were kept "
+                "for later verification."
+            )
+
+        # =============================================
+        # ALL SEARCH ATTEMPTS FAILED QUALITY CHECK
+        # =============================================
+
+        else:
+
+            word.default_image = None
+            word.media_type = None
+
+            print(
+                f"\nNo suitable stock image "
+                f"found for {word.word}."
+            )
+
+            print(
+                f"Best score: "
+                f"{result.get('selected_score', 0)}"
+            )
+
+        print(
+            f"Finished image processing "
+            f"for {word.word}"
+        )

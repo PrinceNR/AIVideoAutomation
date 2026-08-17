@@ -9,5 +9,6 @@ class Lesson:
     title: str
 
     topic: str
+    suggestions: str = ""
 
     words: list[Word] = field(default_factory=list)
