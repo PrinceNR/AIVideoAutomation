@@ -32,82 +32,139 @@ class ImageFallbackService:
         per_source: int = IMAGE_COUNT
     ) -> dict:
 
+        preferred_media = (
+            word.preferred_media
+            or "photo"
+        ).lower()
+
         # -----------------------------------------
-        # 1. Try normal stock photos first
+        # CHOOSE SEARCH ORDER
         # -----------------------------------------
 
-        print(
-            f"\nTrying photo media for: "
-            f"{word.word}"
+        if preferred_media == "illustration":
+
+            first_type = (
+                ImageCandidateType.ILLUSTRATION
+            )
+
+            second_type = (
+                ImageCandidateType.PHOTO
+            )
+
+        else:
+
+            # Photo words use photo first.
+            # Video fallback also uses photo first.
+            first_type = (
+                ImageCandidateType.PHOTO
+            )
+
+            second_type = (
+                ImageCandidateType.ILLUSTRATION
+            )
+
+        # -----------------------------------------
+        # FIRST MEDIA TYPE
+        # -----------------------------------------
+
+        first_result = self._select_type(
+            word=word,
+            image_folder=image_folder,
+            per_source=per_source,
+            candidate_type=first_type
         )
 
-        photo_result = (
-            self.selection_service.select(
-                word=word,
-                image_folder=image_folder,
-                per_source=per_source,
-                candidate_type=(
-                    ImageCandidateType.PHOTO
+        status = first_result.get(
+            "status"
+        )
+
+        if status in (
+            "selected",
+            "verification_unavailable"
+        ):
+
+            return self._build_result(
+                final_result=first_result,
+
+                photo_result=(
+                    first_result
+                    if first_type
+                    == ImageCandidateType.PHOTO
+                    else None
+                ),
+
+                illustration_result=(
+                    first_result
+                    if first_type
+                    == ImageCandidateType.ILLUSTRATION
+                    else None
                 )
             )
-        )
-
-        if (
-            photo_result.get("status")
-            == "selected"
-        ):
-
-            return self._build_result(
-                final_result=photo_result,
-                photo_result=photo_result
-            )
-
-        # Gemini unavailable:
-        # don't waste another Gemini request.
-        if (
-            photo_result.get("status")
-            == "verification_unavailable"
-        ):
-
-            return self._build_result(
-                final_result=photo_result,
-                photo_result=photo_result
-            )
 
         # -----------------------------------------
-        # 2. Photos failed → try illustrations
+        # SECOND MEDIA TYPE
         # -----------------------------------------
 
         print(
-            f"\nNo suitable photo found "
+            f"\nNo suitable "
+            f"{first_type.value} found "
             f"for {word.word}."
         )
 
-        print(
-            "Trying illustrations..."
+        second_result = self._select_type(
+            word=word,
+            image_folder=image_folder,
+            per_source=per_source,
+            candidate_type=second_type
         )
 
-        illustration_result = (
-            self.selection_service.select(
-                word=word,
-                image_folder=image_folder,
-                per_source=per_source,
-                candidate_type=(
-                    ImageCandidateType.ILLUSTRATION
-                )
-            )
-        )
+        photo_result = None
+        illustration_result = None
+
+        if (
+            first_type
+            == ImageCandidateType.PHOTO
+        ):
+
+            photo_result = first_result
+            illustration_result = second_result
+
+        else:
+
+            illustration_result = first_result
+            photo_result = second_result
 
         return self._build_result(
-            final_result=illustration_result,
+            final_result=second_result,
             photo_result=photo_result,
             illustration_result=illustration_result
         )
 
-    def _build_result(
+    def _select_type(
         self,
+        word: Word,
+        image_folder: Path,
+        per_source: int,
+        candidate_type: ImageCandidateType
+    ) -> dict:
+
+        print(
+            f"\nTrying "
+            f"{candidate_type.value} media "
+            f"for: {word.word}"
+        )
+
+        return self.selection_service.select(
+            word=word,
+            image_folder=image_folder,
+            per_source=per_source,
+            candidate_type=candidate_type
+        )
+
+    @staticmethod
+    def _build_result(
         final_result: dict,
-        photo_result: dict,
+        photo_result: dict | None = None,
         illustration_result: dict | None = None
     ) -> dict:
 
@@ -116,10 +173,11 @@ class ImageFallbackService:
         )
 
         result["media_attempts"] = {
-            "photo": photo_result,
-            "illustration": (
+            "photo":
+                photo_result,
+
+            "illustration":
                 illustration_result
-            )
         }
 
         return result

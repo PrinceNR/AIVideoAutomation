@@ -308,12 +308,26 @@ class VideoSelectionService:
                             candidate_results
                     })
 
+                    preview_image = None
+
+                    if frames:
+                        preview_index = (
+                            1 if len(frames) > 1 else 0
+                        )
+
+                        preview_image = str(
+                            frames[preview_index]
+                        )
+
                     return {
                         "status":
                             "selected",
 
                         "selected_video":
                             candidate.local_path,
+
+                        "preview_image":
+                            preview_image,
 
                         "selected_score":
                             score,

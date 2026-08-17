@@ -6,6 +6,8 @@ from models.lesson_mapper import LessonMapper
 from verification.content_verifier import ContentVerifier
 from media_engine.media_planning_service import MediaPlanningService
 from video_engine.video_query_planning_service import VideoQueryPlanningService
+from media_engine.media_selection_service import MediaSelectionService
+
 
 
 
@@ -20,6 +22,8 @@ class VocabularyPipeline:
         self.content_verifier = ContentVerifier()
         self.media_planning_service = MediaPlanningService()
         self.video_query_planning_service = VideoQueryPlanningService()
+        self.media_selection_service =  MediaSelectionService()
+
 
 
     def run(self, topic: str, count: int, suggestions: str):
@@ -125,14 +129,14 @@ class VocabularyPipeline:
 
 
         print(
-            "\nDownloading images..."
+            "\nSelecting lesson media..."
         )
 
         for word in lesson.words:
 
-            self.image_downloader.download_word_images(
-                word,
-                lesson_folder
+            self.media_selection_service.process_word(
+                word=word,
+                lesson_folder=lesson_folder
             )
 
             # Save progress after every word
