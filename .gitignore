@@ -14,5 +14,7 @@ __pycache__/
 *.pyd
 .pytest_cache/
 
+build/temp_pptx/
+
 # Generated project files
 output/

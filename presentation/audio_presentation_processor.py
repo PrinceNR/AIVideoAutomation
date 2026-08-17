@@ -5,6 +5,7 @@ from presentation.embedders.audio_embedder import AudioEmbedder
 from presentation.audio_duration_calculator import AudioDurationCalculator
 from presentation.slide_timing.slide_timing_controller import SlideTimingController
 from presentation.timeline.slide_timeline import SlideTimeline
+from config import NO_AUDIO_SLIDE_DURATION
 
 
 class AudioPresentationProcessor:
@@ -139,8 +140,17 @@ class AudioPresentationProcessor:
                     # Set PowerPoint slide duration
                     # -------------------------------------------------
 
-                    slide_duration = timeline.duration
+                    if timeline.audio_events:
 
+                        slide_duration = (
+                            timeline.duration
+                        )
+
+                    else:
+
+                        slide_duration = (
+                            NO_AUDIO_SLIDE_DURATION
+                        )
                     self.slide_timing_controller.set_slide_duration(
                         slide,
                         slide_duration

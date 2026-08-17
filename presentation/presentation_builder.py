@@ -4,7 +4,10 @@ from presentation.slide_group_duplicator import SlideGroupDuplicator
 from presentation.slide_group_manager import SlideGroupManager
 from presentation.template_definition_loader import TemplateDefinitionLoader
 from presentation.postprocessor.pptx_post_processor import PptxPostProcessor
-from presentation.audio_presentation_processor import (AudioPresentationProcessor)
+from presentation.audio_presentation_processor import AudioPresentationProcessor
+from presentation.video_presentation_processor import VideoPresentationProcessor
+
+
 
 
 class PresentationBuilder:
@@ -18,6 +21,7 @@ class PresentationBuilder:
         self.template_loader = TemplateDefinitionLoader()
         self.post_processor = PptxPostProcessor() 
         self.audio_presentation_processor = AudioPresentationProcessor()
+        self.video_presentation_processor = VideoPresentationProcessor()
 
     def build(
         self,
@@ -87,6 +91,12 @@ class PresentationBuilder:
         )
 
         self.audio_presentation_processor.process(
+            pptx_path=output_path,
+            lesson=lesson,
+            template_definition=template_definition
+        )
+
+        self.video_presentation_processor.process(
             pptx_path=output_path,
             lesson=lesson,
             template_definition=template_definition

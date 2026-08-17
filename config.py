@@ -55,6 +55,8 @@ GEMINI_VIDEO_VERIFIER_FALLBACK_MODEL = (
     GEMINI_IMAGE_VERIFIER_FALLBACK_MODEL
 )
 
+NO_AUDIO_SLIDE_DURATION = 5.0
+
 # =========================================================
 # PRESENTATION
 # =========================================================
