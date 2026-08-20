@@ -24,7 +24,8 @@ from video_engine.video_verifier import (
 
 from config import (
     VIDEO_SEARCH_COUNT,
-    VIDEO_VERIFY_COUNT
+    VIDEO_VERIFY_COUNT,
+    VIDEO_VERIFICATION_MAX_CANDIDATES
 )
 
 
@@ -36,7 +37,10 @@ class VideoSelectionService:
         candidate_collector=None,
         candidate_downloader=None,
         frame_extractor=None,
-        video_verifier=None
+        video_verifier=None,
+        max_verifications_per_word=(
+            VIDEO_VERIFICATION_MAX_CANDIDATES
+        )
     ):
 
         self.search_strategy = (
@@ -62,6 +66,10 @@ class VideoSelectionService:
         self.video_verifier = (
             video_verifier
             or VideoVerifier()
+        )
+
+        self.max_verifications_per_word = (
+            max_verifications_per_word
         )
 
     def select(
@@ -93,11 +101,26 @@ class VideoSelectionService:
         verification_unavailable = False
         verification_completed = False
         processing_failed = False
+        verification_count = 0
+        verified_candidate_keys = set()
 
         for attempt_number, query in enumerate(
             queries,
             start=1
         ):
+
+            if (
+                verification_count
+                >= self.max_verifications_per_word
+            ):
+
+                print(
+                    "Gemini video verification limit "
+                    f"reached ({self.max_verifications_per_word} "
+                    "per word)."
+                )
+
+                break
 
             print(
                 f"\nVideo selection attempt "
@@ -131,6 +154,37 @@ class VideoSelectionService:
 
                 continue
 
+            candidates, duplicate_count = (
+                self._exclude_verified_candidates(
+                    candidates,
+                    verified_candidate_keys
+                )
+            )
+
+            if duplicate_count:
+
+                print(
+                    f"Skipped {duplicate_count} video "
+                    "candidate(s) already verified "
+                    "for this word."
+                )
+
+            if not candidates:
+
+                attempts.append({
+                    "attempt": attempt_number,
+                    "query": query,
+                    "status": "no_new_candidates",
+                    "candidates": []
+                })
+
+                continue
+
+            remaining_verifications = (
+                self.max_verifications_per_word
+                - verification_count
+            )
+
             attempt_folder = (
                 output_folder
                 / f"attempt_{attempt_number:02d}"
@@ -141,7 +195,10 @@ class VideoSelectionService:
                     candidates=candidates,
                     output_folder=attempt_folder,
                     max_downloads=(
-                        VIDEO_VERIFY_COUNT
+                        min(
+                            VIDEO_VERIFY_COUNT,
+                            remaining_verifications
+                        )
                     )
                 )
             )
@@ -179,6 +236,14 @@ class VideoSelectionService:
                             )
                         )
                     )
+
+                    verified_candidate_keys.update(
+                        self._candidate_identity_keys(
+                            candidate
+                        )
+                    )
+
+                    verification_count += 1
 
                     verification = (
                         self.video_verifier.verify(
@@ -421,3 +486,94 @@ class VideoSelectionService:
             "attempts":
                 attempts
         }
+
+    def _exclude_verified_candidates(
+        self,
+        candidates,
+        verified_candidate_keys
+    ):
+
+        unique_candidates = []
+        current_query_keys = set()
+        duplicate_count = 0
+
+        for candidate in candidates:
+
+            candidate_keys = (
+                self._candidate_identity_keys(
+                    candidate
+                )
+            )
+
+            if candidate_keys and (
+                candidate_keys
+                & (
+                    verified_candidate_keys
+                    | current_query_keys
+                )
+            ):
+
+                duplicate_count += 1
+                continue
+
+            unique_candidates.append(
+                candidate
+            )
+
+            current_query_keys.update(
+                candidate_keys
+            )
+
+        return (
+            unique_candidates,
+            duplicate_count
+        )
+
+    def _candidate_identity_keys(
+        self,
+        candidate
+    ):
+
+        keys = set()
+
+        source = str(
+            getattr(
+                candidate,
+                "source",
+                ""
+            )
+            or ""
+        ).strip().lower()
+
+        source_id = str(
+            getattr(
+                candidate,
+                "source_id",
+                ""
+            )
+            or ""
+        ).strip()
+
+        if source_id:
+            keys.add((
+                "source_id",
+                source,
+                source_id
+            ))
+
+        video_url = str(
+            getattr(
+                candidate,
+                "video_url",
+                ""
+            )
+            or ""
+        ).strip()
+
+        if video_url:
+            keys.add((
+                "video_url",
+                video_url
+            ))
+
+        return keys
