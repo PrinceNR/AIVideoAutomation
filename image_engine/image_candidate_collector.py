@@ -5,7 +5,8 @@ from image_engine.pexels_client import (
 )
 
 from image_engine.pixabay_client import (
-    PixabayClient
+    PixabayClient,
+    PixabayCooldownError
 )
 from image_engine.image_candidate_type import (
     ImageCandidateType
@@ -158,6 +159,17 @@ class ImageCandidateCollector:
                         save_path
                     )
 
+                except PixabayCooldownError as error:
+
+                    print(
+                        "Pixabay returned 429; "
+                        "skipping remaining Pixabay "
+                        "downloads during its "
+                        f"{error.retry_after_seconds:.0f}s "
+                        "cooldown."
+                    )
+                    break
+
                 except Exception as error:
 
                     print(
@@ -167,6 +179,15 @@ class ImageCandidateCollector:
                     )
 
                     continue
+
+        except PixabayCooldownError as error:
+
+            print(
+                "Skipping Pixabay search; "
+                "cooldown has "
+                f"{error.retry_after_seconds:.0f}s "
+                "remaining."
+            )
 
         except Exception as error:
 

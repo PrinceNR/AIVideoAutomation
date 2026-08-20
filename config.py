@@ -26,6 +26,7 @@ GEMINI_FALLBACK_MODEL = "gemini-3.6-flash"
 
 IMAGE_COUNT = 3
 IMAGE_FORMAT = "jpg"
+IMAGE_VERIFICATION_MAX_CANDIDATES = 8
 
 
 GEMINI_IMAGE_VERIFIER_MODEL = "gemini-3.6-flash"
@@ -57,12 +58,29 @@ GEMINI_VIDEO_VERIFIER_FALLBACK_MODEL = (
 
 NO_AUDIO_SLIDE_DURATION = 5.0
 
+
+# =========================================================
+# AUDIO
+# =========================================================
+
+AZURE_PRONUNCIATION_VOICE = "en-IN-AartiNeural"
+
+PRONUNCIATION_RATE = "0.65"
+
+PRONUNCIATION_MIN_SCORE = 85
+
+TTS_PROVIDER = "azure"
+
+AZURE_NARRATION_VOICE = "en-IN-AartiNeural"
+
+AZURE_NARRATION_RATE = "0.85"
+
 # =========================================================
 # PRESENTATION
 # =========================================================
 
 PRESENTATION_TEMPLATE_PATH = (
-    "templates/vocabulary_template_v2.pptx"
+    "templates/vocabulary_template_v3.pptx"
 )
 
 

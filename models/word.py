@@ -39,6 +39,7 @@ class Word:
     requires_motion: bool = False
 
     media_type: str | None = None
+    media_status: str | None = None
     video_folder: str | None = None
     default_video: str | None = None
 

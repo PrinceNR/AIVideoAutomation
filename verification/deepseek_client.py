@@ -1,3 +1,4 @@
+import json
 import os
 
 from dotenv import load_dotenv
@@ -10,6 +11,8 @@ load_dotenv()
 
 
 class DeepSeekClient:
+
+    MAX_OUTPUT_TOKENS = 16000
 
     def __init__(self):
 
@@ -29,271 +32,152 @@ class DeepSeekClient:
 
         self.last_model_used = None
 
-    def generate(
-        self,
-        prompt
-        ):
+    def generate(self, prompt):
 
-        # =================================================
-        # ATTEMPT 1
-        # Thinking mode + JSON output
-        # =================================================
-
-        print(
-            "DeepSeek verification: "
-            "thinking mode + JSON output"
-        )
-
-        response = (
-            self.client.chat.completions.create(
-                model=CONTENT_VERIFIER_MODEL,
-
-                messages=[
-                    {
-                        "role": "system",
-                        "content": (
-                            "You are a strict but fair "
-                            "educational content verifier. "
-                            "Carefully check every vocabulary "
-                            "word. Return valid JSON only."
-                        )
-                    },
-                    {
-                        "role": "user",
-                        "content": prompt
-                    }
-                ],
-
-                response_format={
-                    "type": "json_object"
-                },
-
-                reasoning_effort="high",
-
-                max_tokens=16000,
-
-                stream=False,
-
-                extra_body={
-                    "thinking": {
-                        "type": "enabled"
-                    }
-                }
+        strategies = [
+            (
+                "non-thinking + JSON output",
+                True
+            ),
+            (
+                "non-thinking without "
+                "JSON response_format",
+                False
             )
-        )
+        ]
 
-        self.last_model_used = getattr(
-            response,
-            "model",
-            CONTENT_VERIFIER_MODEL
-        )
+        for attempt, (
+            strategy_name,
+            structured_output
+        ) in enumerate(strategies, start=1):
 
-        print(
-            f"Verifier model used: "
-            f"{self.last_model_used}"
-        )
+            if attempt == 1:
+                print(
+                    "DeepSeek verification: "
+                    f"{strategy_name}"
+                )
+            else:
+                print(
+                    "Trying DeepSeek fallback: "
+                    f"{strategy_name}..."
+                )
 
-        content = (
-            response
-            .choices[0]
-            .message
-            .content
-        )
-
-        finish_reason = (
-            response
-            .choices[0]
-            .finish_reason
-        )
-
-        print(
-            f"DeepSeek finish reason: "
-            f"{finish_reason}"
-        )
-
-        # -----------------------------------------
-        # Good response
-        # -----------------------------------------
-
-        if (
-            content
-            and content.strip()
-        ):
-
-            return content
-
-
-        # =================================================
-        # ATTEMPT 2
-        # Thinking mode WITHOUT JSON response_format
-        # =================================================
-
-        print(
-            "DeepSeek returned empty content."
-        )
-
-        print(
-            "Retrying with thinking mode "
-            "without JSON response_format..."
-        )
-
-        response = (
-            self.client.chat.completions.create(
-                model=CONTENT_VERIFIER_MODEL,
-
-                messages=[
-                    {
-                        "role": "system",
-                        "content": (
-                            "You are a strict but fair "
-                            "educational content verifier. "
-                            "Carefully check every vocabulary "
-                            "word. Return ONLY one valid JSON "
-                            "object. Do not use markdown."
-                        )
-                    },
-                    {
-                        "role": "user",
-                        "content": prompt
-                    }
-                ],
-
-                reasoning_effort="high",
-
-                max_tokens=16000,
-
-                stream=False,
-
-                extra_body={
-                    "thinking": {
-                        "type": "enabled"
-                    }
-                }
+            response = self._request(
+                prompt=prompt,
+                structured_output=structured_output
             )
-        )
 
-        self.last_model_used = getattr(
-            response,
-            "model",
-            CONTENT_VERIFIER_MODEL
-        )
+            self.last_model_used = getattr(
+                response,
+                "model",
+                CONTENT_VERIFIER_MODEL
+            )
 
-        content = (
-            response
-            .choices[0]
-            .message
-            .content
-        )
-
-        finish_reason = (
-            response
-            .choices[0]
-            .finish_reason
-        )
-
-        print(
-            f"DeepSeek retry finish reason: "
-            f"{finish_reason}"
-        )
-
-        if (
-            content
-            and content.strip()
-        ):
+            choice = response.choices[0]
+            content = choice.message.content
+            finish_reason = choice.finish_reason
 
             print(
-                "DeepSeek retry succeeded."
+                f"Verifier model used: "
+                f"{self.last_model_used}"
             )
-
-            return content
-
-
-        # =================================================
-        # ATTEMPT 3
-        # Non-thinking fallback
-        # =================================================
-
-        print(
-            "Thinking-mode retry also "
-            "returned empty content."
-        )
-
-        print(
-            "Trying non-thinking fallback..."
-        )
-
-        response = (
-            self.client.chat.completions.create(
-                model=CONTENT_VERIFIER_MODEL,
-
-                messages=[
-                    {
-                        "role": "system",
-                        "content": (
-                            "You are a careful educational "
-                            "content verifier. "
-                            "Return valid JSON only."
-                        )
-                    },
-                    {
-                        "role": "user",
-                        "content": prompt
-                    }
-                ],
-
-                response_format={
-                    "type": "json_object"
-                },
-
-                max_tokens=16000,
-
-                stream=False,
-
-                extra_body={
-                    "thinking": {
-                        "type": "disabled"
-                    }
-                }
-            )
-        )
-
-        self.last_model_used = getattr(
-            response,
-            "model",
-            CONTENT_VERIFIER_MODEL
-        )
-
-        content = (
-            response
-            .choices[0]
-            .message
-            .content
-        )
-
-        finish_reason = (
-            response
-            .choices[0]
-            .finish_reason
-        )
-
-        print(
-            f"DeepSeek fallback finish reason: "
-            f"{finish_reason}"
-        )
-
-        if (
-            content
-            and content.strip()
-        ):
-
             print(
-                "DeepSeek non-thinking "
-                "fallback succeeded."
+                f"DeepSeek finish reason: "
+                f"{finish_reason}"
             )
 
-            return content
+            if self._is_complete_json(
+                content,
+                finish_reason
+            ):
+                print(
+                    "DeepSeek strategy succeeded: "
+                    f"{strategy_name}."
+                )
+                return content
+
+            if attempt == 1:
+                print(
+                    "DeepSeek primary response was "
+                    "empty, truncated, or malformed."
+                )
 
         raise ValueError(
-            "DeepSeek returned empty content "
-            "after all retry attempts."
+            "DeepSeek verification failed: both "
+            "request strategies returned empty, "
+            "truncated, or malformed JSON."
         )
+
+    def _request(
+        self,
+        prompt,
+        structured_output
+    ):
+
+        request = {
+            "model": CONTENT_VERIFIER_MODEL,
+            "messages": [
+                {
+                    "role": "system",
+                    "content": (
+                        "You are a strict but fair "
+                        "educational content verifier. "
+                        "Carefully check every vocabulary "
+                        "word. Return only one complete "
+                        "valid JSON object."
+                    )
+                },
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ],
+            "max_tokens": self.MAX_OUTPUT_TOKENS,
+            "stream": False,
+            "extra_body": {
+                "thinking": {
+                    "type": "disabled"
+                }
+            }
+        }
+
+        if structured_output:
+            request["response_format"] = {
+                "type": "json_object"
+            }
+
+        return self.client.chat.completions.create(
+            **request
+        )
+
+    @staticmethod
+    def _is_complete_json(
+        content,
+        finish_reason
+    ):
+
+        if finish_reason == "length":
+            return False
+
+        if not isinstance(content, str):
+            return False
+
+        text = content.strip()
+
+        if not text:
+            return False
+
+        if text.startswith("```json"):
+            text = text[7:]
+        elif text.startswith("```"):
+            text = text[3:]
+
+        if text.endswith("```"):
+            text = text[:-3]
+
+        try:
+            parsed = json.loads(text.strip())
+        except json.JSONDecodeError:
+            return False
+
+        return isinstance(parsed, dict)

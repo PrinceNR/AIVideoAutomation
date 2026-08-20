@@ -28,13 +28,30 @@ class VocabularyPipeline:
 
     def run(self, topic: str, count: int, suggestions: str):
 
+        lesson_folder = self.file_manager.create_lesson_folder(topic)
+        lesson_path = lesson_folder / "lesson.json"
+
+        if lesson_path.is_file():
+            checkpoint_lesson = self.file_manager.load_lesson(
+                lesson_path
+            )
+
+            if self._can_resume_media(checkpoint_lesson):
+                print(
+                    "Resuming media selection from "
+                    f"checkpoint: {lesson_path}"
+                )
+
+                return self._continue_lesson(
+                    lesson=checkpoint_lesson,
+                    lesson_folder=lesson_folder,
+                    lesson_path=lesson_path
+                )
+
         print("Generating lesson...")
 
         lesson = generate_vocabulary(topic, count, suggestions)
         lesson.suggestions = suggestions
-
-        lesson_folder = self.file_manager.create_lesson_folder(topic)
-        lesson_path = lesson_folder / "lesson.json"
 
         lesson_dict = LessonMapper.to_dict(lesson)
 
@@ -128,9 +145,34 @@ class VocabularyPipeline:
         )
 
 
-        print(
-            "\nSelecting lesson media..."
+        return self._continue_lesson(
+            lesson=lesson,
+            lesson_folder=lesson_folder,
+            lesson_path=lesson_path
         )
+
+    @staticmethod
+    def _can_resume_media(lesson) -> bool:
+
+        valid_media_types = {
+            "photo",
+            "illustration",
+            "video"
+        }
+
+        return bool(lesson.words) and all(
+            word.preferred_media in valid_media_types
+            for word in lesson.words
+        )
+
+    def _continue_lesson(
+        self,
+        lesson,
+        lesson_folder,
+        lesson_path
+    ):
+
+        print("\nSelecting lesson media...")
 
         for word in lesson.words:
 
@@ -149,11 +191,24 @@ class VocabularyPipeline:
                 lesson_path
             )
 
-        # for word in lesson.words:
-        #     self.audio_generator.generate_word_audio(
-        #         word,
-        #         lesson_folder
-        #     )
+        self._print_media_summary(
+            lesson.words
+        )
+
+        for word in lesson.words:
+            self.audio_generator.generate_word_audio(
+                word,
+                lesson_folder
+            )
+
+            lesson_dict = LessonMapper.to_dict(
+                lesson
+            )
+
+            self.file_manager.save_json(
+                lesson_dict,
+                lesson_path
+            )
 
         lesson_dict = LessonMapper.to_dict(lesson)
 
@@ -165,6 +220,58 @@ class VocabularyPipeline:
         print("\nPipeline completed successfully!")
 
         return lesson_path
+
+    @staticmethod
+    def _print_media_summary(words):
+
+        labels = {
+            "selected": "Selected",
+            "fallback_selected": "Fallback selected",
+            "media_missing": "Missing",
+            "verification_unavailable": (
+                "Verification unavailable"
+            ),
+            "error": "Errors"
+        }
+
+        counts = {
+            status: 0
+            for status in labels
+        }
+        problem_words = []
+
+        for word in words:
+            status = getattr(
+                word,
+                "media_status",
+                None
+            )
+
+            if status not in counts:
+                status = "error"
+
+            counts[status] += 1
+
+            if status not in (
+                "selected",
+                "fallback_selected"
+            ):
+                problem_words.append(
+                    (word.word, status)
+                )
+
+        print("\nMEDIA SELECTION SUMMARY")
+        print(f"Words processed: {len(words)}")
+
+        for status, label in labels.items():
+            print(f"{label}: {counts[status]}")
+
+        if problem_words:
+            print("\nProblem words:")
+            for word_text, status in problem_words:
+                print(f"{word_text} -> {status}")
+
+        return counts
 
 
 if __name__ == "__main__":

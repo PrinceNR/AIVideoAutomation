@@ -90,6 +90,9 @@ class VideoSelectionService:
 
         best_score = 0
         best_candidate = None
+        verification_unavailable = False
+        verification_completed = False
+        processing_failed = False
 
         for attempt_number, query in enumerate(
             queries,
@@ -187,6 +190,8 @@ class VideoSelectionService:
 
                 except Exception as error:
 
+                    processing_failed = True
+
                     candidate_results.append({
                         "source":
                             candidate.source,
@@ -208,6 +213,16 @@ class VideoSelectionService:
                     })
 
                     continue
+
+                verification_status = (
+                    verification.get(
+                        "verification_status",
+                        "completed"
+                    )
+                )
+
+                if verification_status == "unavailable":
+                    verification_unavailable = True
 
                 score = (
                     verification.get(
@@ -271,12 +286,20 @@ class VideoSelectionService:
                     "model_used":
                         verification.get(
                             "model_used"
-                        )
+                        ),
+
+                    "verification_status":
+                        verification_status
                 }
 
                 candidate_results.append(
                     candidate_result
                 )
+
+                if verification_status == "unavailable":
+                    continue
+
+                verification_completed = True
 
                 if score > best_score:
 
@@ -373,9 +396,15 @@ class VideoSelectionService:
                 "passed video verification."
             )
 
+        if verification_unavailable:
+            status = "verification_unavailable"
+        elif processing_failed and not verification_completed:
+            status = "error"
+        else:
+            status = "no_suitable_video"
+
         return {
-            "status":
-                "no_suitable_video",
+            "status": status,
 
             "selected_video":
                 None,

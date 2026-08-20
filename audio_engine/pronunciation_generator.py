@@ -2,6 +2,7 @@ from pathlib import Path
 from xml.sax.saxutils import escape
 
 import os
+import time
 
 from dotenv import load_dotenv
 import azure.cognitiveservices.speech as speechsdk
@@ -15,7 +16,20 @@ from config import (
 load_dotenv()
 
 
+class PronunciationGenerationError(RuntimeError):
+    pass
+
+
+class TransientPronunciationError(
+    PronunciationGenerationError
+):
+    pass
+
+
 class PronunciationGenerator:
+
+    MAX_ATTEMPTS = 3
+    BACKOFF_SECONDS = 1.0
 
     def __init__(self):
 
@@ -51,6 +65,81 @@ class PronunciationGenerator:
             parents=True,
             exist_ok=True
         )
+
+        for attempt in range(
+            1,
+            self.MAX_ATTEMPTS + 1
+        ):
+
+            try:
+                self._generate_once(
+                    word,
+                    output_path
+                )
+                return
+
+            except Exception as error:
+                if not isinstance(
+                    error,
+                    PronunciationGenerationError
+                ):
+                    details = self._concise_error(
+                        error
+                    )
+
+                    if self._is_transient_failure(
+                        details
+                    ):
+                        error = TransientPronunciationError(
+                            details
+                        )
+                    else:
+                        error = PronunciationGenerationError(
+                            "Azure pronunciation request "
+                            "failed permanently: "
+                            f"{details}"
+                        )
+
+                output_path.unlink(
+                    missing_ok=True
+                )
+
+                if not isinstance(
+                    error,
+                    TransientPronunciationError
+                ):
+                    raise error from None
+
+                if attempt >= self.MAX_ATTEMPTS:
+                    raise PronunciationGenerationError(
+                        "Azure pronunciation generation "
+                        "failed after "
+                        f"{self.MAX_ATTEMPTS} transient "
+                        "connection attempts. Check the "
+                        "network and DNS connection. "
+                        f"Last error: {error}"
+                    ) from None
+
+                delay = (
+                    self.BACKOFF_SECONDS
+                    * attempt
+                )
+
+                print(
+                    "Azure pronunciation connection "
+                    f"failed for '{word}'. "
+                    f"Retrying in {delay:g}s "
+                    f"({attempt + 1}/"
+                    f"{self.MAX_ATTEMPTS})..."
+                )
+
+                time.sleep(delay)
+
+    def _generate_once(
+        self,
+        word: str,
+        output_path: Path
+    ):
 
         speech_config = speechsdk.SpeechConfig(
             subscription=self.api_key,
@@ -97,11 +186,27 @@ class PronunciationGenerator:
 </speak>
 """
 
-        result = (
-            synthesizer
-            .speak_ssml_async(ssml)
-            .get()
-        )
+        try:
+            result = (
+                synthesizer
+                .speak_ssml_async(ssml)
+                .get()
+            )
+        except Exception as error:
+            details = str(error)
+
+            if self._is_transient_failure(
+                details
+            ):
+                raise TransientPronunciationError(
+                    self._concise_error(details)
+                ) from None
+
+            raise PronunciationGenerationError(
+                "Azure pronunciation request "
+                "failed permanently: "
+                f"{self._concise_error(details)}"
+            ) from None
 
         if (
             result.reason
@@ -125,13 +230,90 @@ class PronunciationGenerator:
                 result.cancellation_details
             )
 
-            raise RuntimeError(
-                "Pronunciation generation failed: "
-                f"{cancellation.reason} - "
-                f"{cancellation.error_details}"
+            error_code = getattr(
+                cancellation,
+                "error_code",
+                ""
+            )
+            error_details = getattr(
+                cancellation,
+                "error_details",
+                ""
+            )
+            details = (
+                f"{error_code} {error_details}"
+            ).strip()
+
+            if self._is_transient_failure(
+                details
+            ):
+                raise TransientPronunciationError(
+                    self._concise_error(details)
+                )
+
+            raise PronunciationGenerationError(
+                "Azure pronunciation request was "
+                "rejected and will not be retried: "
+                f"{self._concise_error(details)}"
             )
 
-        raise RuntimeError(
-            "Pronunciation generation failed: "
+        raise PronunciationGenerationError(
+            "Azure pronunciation generation failed "
+            "with unexpected result: "
             f"{result.reason}"
         )
+
+    @staticmethod
+    def _is_transient_failure(details):
+
+        text = str(details).lower()
+
+        permanent_markers = (
+            "authenticationfailure",
+            "authentication failure",
+            "unauthorized",
+            "forbidden",
+            "invalid subscription",
+            "invalid key",
+            "invalid region",
+            "401",
+            "403"
+        )
+
+        if any(
+            marker in text
+            for marker in permanent_markers
+        ):
+            return False
+
+        transient_markers = (
+            "connectionfailure",
+            "connection failed",
+            "no connection to the remote host",
+            "dns resolution failed",
+            "ws_open_error",
+            "websocket",
+            "service timeout",
+            "servicetimeout",
+            "service unavailable",
+            "serviceunavailable",
+            "timed out",
+            "timeout"
+        )
+
+        return any(
+            marker in text
+            for marker in transient_markers
+        )
+
+    @staticmethod
+    def _concise_error(details):
+
+        text = " ".join(
+            str(details).split()
+        )
+
+        if len(text) <= 300:
+            return text
+
+        return text[:297] + "..."

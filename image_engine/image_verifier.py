@@ -1,5 +1,7 @@
 import json
 import mimetypes
+import re
+import time
 from pathlib import Path
 
 from google.genai import (
@@ -93,79 +95,16 @@ class ImageVerifier:
             f"{GEMINI_IMAGE_VERIFIER_MODEL}"
         )
 
-        model_used = (
-            GEMINI_IMAGE_VERIFIER_MODEL
+        response, model_used, failures = (
+            self._generate_with_fallback(
+                contents
+            )
         )
 
-        try:
-
-            response = (
-                client.models.generate_content(
-                    model=GEMINI_IMAGE_VERIFIER_MODEL,
-                    contents=contents
-                )
+        if response is None:
+            return self._unavailable_result(
+                failures
             )
-
-        except errors.ServerError as error:
-
-            if error.code != 503:
-                raise
-
-            print(
-                f"{GEMINI_IMAGE_VERIFIER_MODEL} "
-                "is temporarily unavailable."
-            )
-
-            print(
-                "Trying fallback image model: "
-                f"{GEMINI_IMAGE_VERIFIER_FALLBACK_MODEL}"
-            )
-
-            model_used = (
-                GEMINI_IMAGE_VERIFIER_FALLBACK_MODEL
-            )
-
-            try:
-
-                response = (
-                    client.models.generate_content(
-                        model=(
-                            GEMINI_IMAGE_VERIFIER_FALLBACK_MODEL
-                        ),
-                        contents=contents
-                    )
-                )
-
-            except errors.ServerError as fallback_error:
-
-                if fallback_error.code != 503:
-                    raise
-
-                print(
-                    "Both Gemini image models are "
-                    "temporarily unavailable."
-                )
-
-                return {
-                    "verification_status":
-                        "unavailable",
-
-                    "selected_image":
-                        None,
-
-                    "selected_score":
-                        0,
-
-                    "model_used":
-                        None,
-
-                    "candidates":
-                        [],
-
-                    "error":
-                        "Gemini image verification "
-                        "temporarily unavailable."
-                }
 
         text = self._clean_json(
             response.text
@@ -191,6 +130,356 @@ class ImageVerifier:
         ] = model_used
 
         return validated_result
+
+    # -------------------------------------------------
+    # GEMINI AVAILABILITY / QUOTA HANDLING
+    # -------------------------------------------------
+
+    def _generate_with_fallback(
+        self,
+        contents
+    ):
+
+        models = [
+            GEMINI_IMAGE_VERIFIER_MODEL,
+            GEMINI_IMAGE_VERIFIER_FALLBACK_MODEL
+        ]
+
+        failures = []
+        retry_used = False
+
+        for index, model in enumerate(models):
+
+            if index == 1:
+                print(
+                    "Trying fallback image model: "
+                    f"{model}"
+                )
+
+            response, failure = self._call_model(
+                model,
+                contents
+            )
+
+            if response is not None:
+                return response, model, failures
+
+            self._print_model_failure(
+                model,
+                failure
+            )
+
+            if (
+                failure["kind"] in (
+                    "temporary_rate_limit",
+                    "transient_transport"
+                )
+                and failure["retry_delay"]
+                is not None
+                and not retry_used
+            ):
+                retry_used = True
+                retry_delay = failure[
+                    "retry_delay"
+                ]
+
+                if (
+                    failure["kind"]
+                    == "transient_transport"
+                ):
+                    print(
+                        "Retrying Gemini image "
+                        "verification once after a "
+                        "transient transport failure."
+                    )
+                else:
+                    print(
+                        "Retrying once after Gemini's "
+                        f"{retry_delay:g}s retry delay."
+                    )
+
+                time.sleep(retry_delay)
+
+                response, failure = self._call_model(
+                    model,
+                    contents
+                )
+
+                if response is not None:
+                    return response, model, failures
+
+                self._print_model_failure(
+                    model,
+                    failure,
+                    after_retry=True
+                )
+
+            failures.append(failure["kind"])
+
+        return None, None, failures
+
+    def _call_model(
+        self,
+        model,
+        contents
+    ):
+
+        try:
+            response = client.models.generate_content(
+                model=model,
+                contents=contents
+            )
+            return response, None
+
+        except errors.ServerError as error:
+            if self._is_transient_transport_error(
+                error
+            ):
+                return None, {
+                    "kind": "transient_transport",
+                    "retry_delay": 1.0
+                }
+
+            if error.code != 503:
+                raise
+
+            return None, {
+                "kind": "service_unavailable",
+                "retry_delay": None
+            }
+
+        except errors.ClientError as error:
+            if not self._is_rate_limit_error(error):
+                raise
+
+            return None, self._rate_limit_failure(
+                error
+            )
+
+        except Exception as error:
+            if not self._is_transient_transport_error(
+                error
+            ):
+                raise
+
+            return None, {
+                "kind": "transient_transport",
+                "retry_delay": 1.0
+            }
+
+    def _rate_limit_failure(self, error):
+
+        error_text = self._error_text(error)
+
+        normalized = re.sub(
+            r"[^a-z0-9]+",
+            "",
+            error_text.lower()
+        )
+
+        daily_quota = (
+            "perday" in normalized
+            or "dailyquota" in normalized
+            or "dailylimit" in normalized
+        )
+
+        return {
+            "kind": (
+                "daily_quota_exhausted"
+                if daily_quota
+                else "temporary_rate_limit"
+            ),
+            "retry_delay": (
+                None
+                if daily_quota
+                else self._retry_delay_seconds(error)
+            )
+        }
+
+    def _is_rate_limit_error(self, error):
+
+        if str(getattr(error, "code", "")) == "429":
+            return True
+
+        return (
+            "RESOURCE_EXHAUSTED"
+            in self._error_text(error).upper()
+        )
+
+    def _is_transient_transport_error(self, error):
+
+        text = self._error_text(error).lower()
+
+        markers = (
+            "server disconnected without sending "
+            "a response",
+            "remoteprotocolerror",
+            "connection reset",
+            "connection aborted",
+            "connection closed",
+            "network error",
+            "read timeout",
+            "timed out",
+            "transport error"
+        )
+
+        return any(
+            marker in text
+            for marker in markers
+        )
+
+    def _error_text(self, error):
+
+        values = [
+            str(error),
+            getattr(error, "status", None),
+            getattr(error, "message", None),
+            getattr(error, "details", None),
+            getattr(error, "response_json", None)
+        ]
+
+        return " ".join(
+            str(value)
+            for value in values
+            if value is not None
+        )
+
+    def _retry_delay_seconds(self, error):
+
+        for attribute in (
+            "details",
+            "response_json"
+        ):
+            delay = self._find_retry_delay(
+                getattr(error, attribute, None)
+            )
+            if delay is not None:
+                return delay
+
+        match = re.search(
+            r"retryDelay['\"]?\s*[:=]\s*['\"]?"
+            r"(\d+(?:\.\d+)?)s",
+            self._error_text(error),
+            flags=re.IGNORECASE
+        )
+
+        if match:
+            return float(match.group(1))
+
+        return None
+
+    def _find_retry_delay(self, value):
+
+        if isinstance(value, dict):
+            for key, item in value.items():
+                normalized_key = re.sub(
+                    r"[^a-z]",
+                    "",
+                    str(key).lower()
+                )
+                if normalized_key == "retrydelay":
+                    return self._parse_duration(item)
+
+                delay = self._find_retry_delay(item)
+                if delay is not None:
+                    return delay
+
+        elif isinstance(value, (list, tuple)):
+            for item in value:
+                delay = self._find_retry_delay(item)
+                if delay is not None:
+                    return delay
+
+        return None
+
+    def _parse_duration(self, value):
+
+        if isinstance(value, (int, float)):
+            return max(0.0, float(value))
+
+        if isinstance(value, dict):
+            seconds = float(value.get("seconds", 0))
+            nanos = float(value.get("nanos", 0))
+            return max(
+                0.0,
+                seconds + nanos / 1_000_000_000
+            )
+
+        match = re.fullmatch(
+            r"\s*(\d+(?:\.\d+)?)s?\s*",
+            str(value)
+        )
+
+        if match:
+            return float(match.group(1))
+
+        return None
+
+    def _print_model_failure(
+        self,
+        model,
+        failure,
+        after_retry=False
+    ):
+
+        if failure["kind"] == "daily_quota_exhausted":
+            print(
+                f"{model} daily/project quota "
+                "is exhausted; not retrying this model."
+            )
+        elif failure["kind"] == "temporary_rate_limit":
+            suffix = (
+                " after its single retry"
+                if after_retry
+                else ""
+            )
+            print(
+                f"{model} is temporarily "
+                f"rate-limited{suffix}."
+            )
+        elif failure["kind"] == "transient_transport":
+            suffix = (
+                " after its single retry"
+                if after_retry
+                else ""
+            )
+            print(
+                "Gemini image verification had a "
+                f"transient transport failure{suffix}."
+            )
+        else:
+            print(
+                f"{model} is temporarily unavailable."
+            )
+
+    def _unavailable_result(self, failures):
+
+        if "daily_quota_exhausted" in failures:
+            reason = "quota_exhausted"
+        elif "temporary_rate_limit" in failures:
+            reason = "rate_limited"
+        elif "transient_transport" in failures:
+            reason = "transport_error"
+        else:
+            reason = "service_unavailable"
+
+        print(
+            "Both Gemini image verification "
+            "models are unavailable."
+        )
+
+        return {
+            "verification_status": "unavailable",
+            "unavailable_reason": reason,
+            "selected_image": None,
+            "selected_score": 0,
+            "model_used": None,
+            "candidates": [],
+            "error": (
+                "Gemini image verification "
+                "temporarily unavailable."
+            )
+        }
 
     # -------------------------------------------------
     # PROMPT

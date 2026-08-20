@@ -57,6 +57,8 @@ class LessonMapper:
 
                 media_type=item.get("media_type"),
 
+                media_status=item.get("media_status"),
+
                 video_folder=item.get("video_folder"),
 
                 default_video=item.get("default_video"),

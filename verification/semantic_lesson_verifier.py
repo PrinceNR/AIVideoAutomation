@@ -44,19 +44,40 @@ class SemanticLessonVerifier:
             )
         )
 
-        response_text = self.client.generate(
-            prompt
-        )
+        try:
+            response_text = self.client.generate(
+                prompt
+            )
 
-        response_text = (
-            self._clean_json_response(
+            response_text = (
+                self._clean_json_response(
+                    response_text
+                )
+            )
+
+            report = json.loads(
                 response_text
             )
-        )
 
-        report = json.loads(
-            response_text
-        )
+            if not self._has_complete_corrected_lesson(
+                report,
+                lesson_dict
+            ):
+                raise ValueError(
+                    "DeepSeek returned an incomplete "
+                    "corrected lesson."
+                )
+
+        except (ValueError, TypeError, AttributeError) as error:
+            print(
+                "DeepSeek semantic verification "
+                f"failed cleanly: {error}"
+            )
+
+            return self._failure_report(
+                lesson_dict,
+                error
+            )
 
         # Validate DeepSeek's report
         # against the original lesson.
@@ -70,6 +91,100 @@ class SemanticLessonVerifier:
         )
 
         return report
+
+    @staticmethod
+    def _has_complete_corrected_lesson(
+        report,
+        lesson_dict
+    ):
+
+        if not isinstance(report, dict):
+            return False
+
+        corrected = report.get(
+            "corrected_lesson"
+        )
+
+        if not isinstance(corrected, dict):
+            return False
+
+        for field in (
+            "title",
+            "topic",
+            "suggestions",
+            "words"
+        ):
+            if field not in corrected:
+                return False
+
+        original_words = lesson_dict.get(
+            "words",
+            []
+        )
+        corrected_words = corrected.get(
+            "words"
+        )
+
+        if (
+            not isinstance(corrected_words, list)
+            or len(corrected_words)
+            != len(original_words)
+        ):
+            return False
+
+        required_word_fields = {
+            "word",
+            "meaning",
+            "pronunciation",
+            "part_of_speech",
+            "difficulty",
+            "translations",
+            "present_sentence",
+            "past_sentence",
+            "future_sentence",
+            "base_form",
+            "present_form",
+            "past_form",
+            "synonyms",
+            "antonyms",
+            "image_keywords",
+            "search_query"
+        }
+
+        return all(
+            isinstance(word, dict)
+            and required_word_fields.issubset(
+                word
+            )
+            for word in corrected_words
+        )
+
+    def _failure_report(
+        self,
+        lesson_dict,
+        error
+    ):
+
+        return {
+            "overall_status": "error",
+            "summary": {
+                "total_words": len(
+                    lesson_dict.get("words", [])
+                ),
+                "passed": 0,
+                "warnings": 0,
+                "errors": 1
+            },
+            "results": [],
+            "corrected_lesson": None,
+            "discarded_issues": [],
+            "model_used": getattr(
+                self.client,
+                "last_model_used",
+                None
+            ),
+            "verification_error": str(error)
+        }
 
     # =================================================
     # REPORT VALIDATION

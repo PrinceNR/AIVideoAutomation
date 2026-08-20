@@ -135,6 +135,11 @@ class ImageDownloader:
                 f"{selected_query}"
             )
 
+            print(
+                f"Image selected successfully "
+                f"for {word.word}."
+            )
+
         # =============================================
         # GEMINI TEMPORARILY UNAVAILABLE
         # =============================================
@@ -177,7 +182,4 @@ class ImageDownloader:
                 f"{result.get('selected_score', 0)}"
             )
 
-        print(
-            f"Finished image processing "
-            f"for {word.word}"
-        )
+        return result
