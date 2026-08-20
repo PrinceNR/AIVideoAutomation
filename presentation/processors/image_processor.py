@@ -33,14 +33,18 @@ class ImageProcessor:
         width = picture.width
         height = picture.height
 
+        original_name = picture.name
+
         picture._element.getparent().remove(
             picture._element
         )
 
-        slide.shapes.add_picture(
+        new_picture = slide.shapes.add_picture(
             str(Path(word.default_image)),
             left,
             top,
             width,
             height
         )
+
+        new_picture.name = original_name

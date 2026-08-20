@@ -1,7 +1,10 @@
 class ComVisualSlotLocator:
 
+    IMAGE_SHAPE_NAME = "VOCAB_IMAGE"
+
     EMU_PER_POINT = 12700
 
+    # Legacy template fallback
     IMAGE_LEFT_EMU = 1223367
     IMAGE_TOP_EMU = 728662
     IMAGE_WIDTH_EMU = 3344465
@@ -29,6 +32,34 @@ class ComVisualSlotLocator:
         self,
         slide
     ):
+
+        # ---------------------------------
+        # Preferred method: semantic name
+        # ---------------------------------
+
+        for index in range(
+            1,
+            slide.Shapes.Count + 1
+        ):
+
+            shape = slide.Shapes(
+                index
+            )
+
+            try:
+
+                if (
+                    shape.Name
+                    == self.IMAGE_SHAPE_NAME
+                ):
+                    return shape
+
+            except Exception:
+                pass
+
+        # ---------------------------------
+        # Legacy fallback: old geometry
+        # ---------------------------------
 
         for index in range(
             1,

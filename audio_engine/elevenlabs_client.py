@@ -25,7 +25,8 @@ class ElevenLabsClient:
     def generate_audio(
         self,
         text: str,
-        output_path: Path
+        output_path: Path,
+        audio_type: str = "sentence"
     ):
 
         audio = self.client.text_to_speech.convert(
