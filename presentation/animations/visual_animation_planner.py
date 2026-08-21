@@ -4,6 +4,10 @@ from pathlib import Path
 from pptx import Presentation
 from pptx.enum.shapes import MSO_SHAPE_TYPE
 
+from presentation.animations.visual_animation_settings import (
+    VisualAnimationSettings,
+)
+
 
 @dataclass(frozen=True)
 class VisualAnimationSpec:
@@ -30,15 +34,6 @@ class VisualAnimationPlanner:
 
     SLIDES_PER_WORD = 4
 
-    FADE_EFFECT = 10
-    WIPE_EFFECT = 22
-    LEFT_DIRECTION = 4
-    TEXT_BY_CHARACTER = 1
-
-    FADE_TRANSITION = 1793
-    NO_TRANSITION = 0
-    FAST_TRANSITION = 3
-
     EXCLUDED_SHAPE_NAMES = {
         "PROGRESS_TRACK",
         "PROGRESS_FILL",
@@ -48,23 +43,14 @@ class VisualAnimationPlanner:
         (
             "word",
             ("{{WORD}}",),
-            WIPE_EFFECT,
-            0.25,
-            LEFT_DIRECTION,
         ),
         (
             "pronunciation",
             ("{{PRONUNCIATION}}",),
-            FADE_EFFECT,
-            0.20,
-            None,
         ),
         (
             "meaning",
             ("{{MEANING}}",),
-            FADE_EFFECT,
-            0.20,
-            None,
         ),
         (
             "translation",
@@ -73,9 +59,6 @@ class VisualAnimationPlanner:
                 "{{MALAYALAM}}",
                 "{{TAMIL}}",
             ),
-            FADE_EFFECT,
-            0.20,
-            None,
         ),
         (
             "verb_form",
@@ -84,11 +67,36 @@ class VisualAnimationPlanner:
                 "{{PRESENT_FORM}}",
                 "{{PAST_FORM}}",
             ),
-            FADE_EFFECT,
-            0.20,
-            None,
         ),
     )
+
+    INTRO_SETTING_FIELDS = {
+        "word": (
+            "word_effect",
+            "word_duration",
+            "word_direction",
+        ),
+        "pronunciation": (
+            "pronunciation_effect",
+            "pronunciation_duration",
+            None,
+        ),
+        "meaning": (
+            "meaning_effect",
+            "meaning_duration",
+            None,
+        ),
+        "translation": (
+            "translation_effect",
+            "translation_duration",
+            None,
+        ),
+        "verb_form": (
+            "verb_form_effect",
+            "verb_form_duration",
+            None,
+        ),
+    }
 
     SENTENCE_SHAPES = {
         2: (
@@ -105,17 +113,28 @@ class VisualAnimationPlanner:
         ),
     }
 
+    def __init__(
+        self,
+        settings=None,
+    ):
+        self.settings = (
+            settings
+            or VisualAnimationSettings.from_project_config()
+        )
+
     def transition_spec(
         self,
         slide_within_word
     ):
         return SlideTransitionSpec(
-            entry_effect=(
-                self.FADE_TRANSITION
+            entry_effect=self.settings.transition_id(
+                self.settings.new_word_transition
                 if slide_within_word == 1
-                else self.NO_TRANSITION
+                else self.settings.continuation_transition
             ),
-            speed=self.FAST_TRANSITION,
+            speed=(
+                self.settings.transition_speed_id()
+            ),
         )
 
     def slide_within_word(
@@ -219,8 +238,10 @@ class VisualAnimationPlanner:
             return VisualAnimationSpec(
                 shape_name=shape_name,
                 semantic_element="image",
-                effect_id=self.FADE_EFFECT,
-                duration=0.25,
+                effect_id=self.settings.effect_id(
+                    self.settings.image_effect
+                ),
+                duration=self.settings.image_duration,
             )
 
         normalized_text = "".join(
@@ -230,20 +251,44 @@ class VisualAnimationPlanner:
         for (
             semantic_element,
             placeholders,
-            effect_id,
-            duration,
-            direction,
         ) in self.INTRO_PLACEHOLDER_RULES:
             if any(
                 placeholder in normalized_text
                 for placeholder in placeholders
             ):
+                (
+                    effect_field,
+                    duration_field,
+                    direction_field,
+                ) = self.INTRO_SETTING_FIELDS[
+                    semantic_element
+                ]
+                effect_name = getattr(
+                    self.settings,
+                    effect_field,
+                )
+                direction_name = (
+                    getattr(
+                        self.settings,
+                        direction_field,
+                    )
+                    if direction_field is not None
+                    else None
+                )
+
                 return VisualAnimationSpec(
                     shape_name=shape_name,
                     semantic_element=semantic_element,
-                    effect_id=effect_id,
-                    duration=duration,
-                    direction=direction,
+                    effect_id=self.settings.effect_id(
+                        effect_name
+                    ),
+                    duration=getattr(
+                        self.settings,
+                        duration_field,
+                    ),
+                    direction=self.settings.direction_id(
+                        direction_name
+                    ),
                 )
 
         return None
@@ -289,12 +334,14 @@ class VisualAnimationPlanner:
         return VisualAnimationSpec(
             shape_name=shape_name,
             semantic_element=semantic_element,
-            effect_id=self.WIPE_EFFECT,
-            duration=0.45,
-            direction=self.LEFT_DIRECTION,
-            text_unit_effect=(
-                self.TEXT_BY_CHARACTER
+            effect_id=self.settings.effect_id(
+                self.settings.sentence_effect
             ),
+            duration=self.settings.sentence_duration,
+            direction=self.settings.direction_id(
+                self.settings.sentence_direction
+            ),
+            text_unit_effect=self.settings.text_unit_effect(),
             required=True,
         )
 

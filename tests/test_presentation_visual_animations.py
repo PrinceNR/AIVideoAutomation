@@ -1,8 +1,12 @@
 import io
 import unittest
 from contextlib import redirect_stdout
+from dataclasses import replace
+from unittest.mock import patch
 
 from pptx.enum.shapes import MSO_SHAPE_TYPE
+
+import config as project_config
 
 from presentation.animations.visual_animation_planner import (
     AnimationTemplateError,
@@ -11,6 +15,10 @@ from presentation.animations.visual_animation_planner import (
 )
 from presentation.animations.visual_animation_presentation_processor import (
     VisualAnimationPresentationProcessor,
+)
+from presentation.animations.visual_animation_settings import (
+    AnimationConfigurationError,
+    VisualAnimationSettings,
 )
 
 
@@ -188,6 +196,7 @@ class PresentationVisualAnimationTests(unittest.TestCase):
 
     def setUp(self):
         self.planner = VisualAnimationPlanner()
+        self.settings = self.planner.settings
         self.processor = VisualAnimationPresentationProcessor(
             planner=self.planner
         )
@@ -249,8 +258,45 @@ class PresentationVisualAnimationTests(unittest.TestCase):
         self.assertTrue(specs[0].required)
         self.assertEqual(
             specs[0].text_unit_effect,
-            self.planner.TEXT_BY_CHARACTER,
+            self.settings.text_unit_effect(),
         )
+
+    def test_animation_policy_reads_effects_and_durations_from_config(self):
+        with patch.multiple(
+            project_config,
+            ANIMATION_WORD_EFFECT="fade",
+            ANIMATION_WORD_DURATION=0.33,
+            ANIMATION_SENTENCE_EFFECT="fade",
+            ANIMATION_SENTENCE_DURATION=0.77,
+        ):
+            settings = (
+                VisualAnimationSettings.from_project_config()
+            )
+            planner = VisualAnimationPlanner(
+                settings=settings
+            )
+
+        word_spec = planner.plan_intro_shape(
+            "Intro Word",
+            "{{WORD}}",
+        )
+        sentence_spec = planner.plan_slide(
+            FakeTemplateSlide(
+                [FakeTemplateShape("PAST_SENTENCE")]
+            ),
+            2,
+        )[0]
+
+        self.assertEqual(
+            word_spec.effect_id,
+            settings.effect_id("fade"),
+        )
+        self.assertEqual(word_spec.duration, 0.33)
+        self.assertEqual(
+            sentence_spec.effect_id,
+            settings.effect_id("fade"),
+        )
+        self.assertEqual(sentence_spec.duration, 0.77)
 
     def test_repeated_static_content_is_not_animated_on_slides_2_to_4(self):
         forbidden = {
@@ -301,7 +347,9 @@ class PresentationVisualAnimationTests(unittest.TestCase):
             if self.planner.transition_spec(
                 self.planner.slide_within_word(slide_index)
             ).entry_effect
-            == self.planner.FADE_TRANSITION
+            == self.settings.transition_id(
+                self.settings.new_word_transition
+            )
         ]
 
         self.assertEqual(
@@ -329,7 +377,9 @@ class PresentationVisualAnimationTests(unittest.TestCase):
 
                 self.assertEqual(
                     slide.SlideShowTransition.EntryEffect,
-                    self.planner.NO_TRANSITION,
+                    self.settings.transition_id(
+                        self.settings.continuation_transition
+                    ),
                 )
                 self.assertEqual(
                     (
@@ -360,9 +410,13 @@ class PresentationVisualAnimationTests(unittest.TestCase):
         spec = VisualAnimationSpec(
             shape_name="Intro Word",
             semantic_element="word",
-            effect_id=self.planner.WIPE_EFFECT,
-            duration=0.25,
-            direction=self.planner.LEFT_DIRECTION,
+            effect_id=self.settings.effect_id(
+                self.settings.word_effect
+            ),
+            duration=self.settings.word_duration,
+            direction=self.settings.direction_id(
+                self.settings.word_direction
+            ),
         )
 
         self.processor.process_slide(slide, [spec], 1, 1)
@@ -409,11 +463,13 @@ class PresentationVisualAnimationTests(unittest.TestCase):
 
         self.assertEqual(
             visual_effect.TextUnitEffect,
-            self.planner.TEXT_BY_CHARACTER,
+            self.settings.text_unit_effect(),
         )
         self.assertEqual(
             visual_effect.EffectType,
-            self.planner.WIPE_EFFECT,
+            self.settings.effect_id(
+                self.settings.sentence_effect
+            ),
         )
         self.assertEqual(
             visual_effect.Timing.TriggerType,
@@ -421,7 +477,60 @@ class PresentationVisualAnimationTests(unittest.TestCase):
         )
         self.assertEqual(
             visual_effect.Timing.TriggerDelayTime,
-            0.0,
+            self.settings.visual_delay,
+        )
+
+    def test_changed_sentence_duration_does_not_change_audio_timing(self):
+        settings = replace(
+            self.settings,
+            sentence_duration=1.25,
+        )
+        planner = VisualAnimationPlanner(
+            settings=settings
+        )
+        processor = VisualAnimationPresentationProcessor(
+            planner=planner
+        )
+        sentence_spec = planner.plan_slide(
+            FakeTemplateSlide(
+                [FakeTemplateShape("PAST_SENTENCE")]
+            ),
+            2,
+        )[0]
+        audio = audio_effect(
+            duration=3.0,
+            delay=0.5,
+        )
+        sequence = FakeSequence([audio])
+        slide = FakeSlide(
+            shapes=[FakeShape("PAST_SENTENCE")],
+            sequence=sequence,
+        )
+        audio_before = (
+            audio.Timing.TriggerType,
+            audio.Timing.TriggerDelayTime,
+            audio.Timing.Duration,
+        )
+
+        processor.process_slide(
+            slide,
+            [sentence_spec],
+            2,
+            2,
+        )
+
+        self.assertEqual(sentence_spec.duration, 1.25)
+        self.assertEqual(
+            (
+                audio.Timing.TriggerType,
+                audio.Timing.TriggerDelayTime,
+                audio.Timing.Duration,
+            ),
+            audio_before,
+        )
+        self.assertEqual(
+            slide.SlideShowTransition.AdvanceTime,
+            7.25,
         )
 
     def test_character_conversion_failure_keeps_safe_wipe(self):
@@ -449,16 +558,40 @@ class PresentationVisualAnimationTests(unittest.TestCase):
         self.assertIsNone(visual_effect.TextUnitEffect)
         self.assertEqual(
             visual_effect.EffectType,
-            self.planner.WIPE_EFFECT,
+            self.settings.effect_id(
+                self.settings.sentence_effect
+            ),
         )
         self.assertEqual(
             visual_effect.EffectParameters.Direction,
-            self.planner.LEFT_DIRECTION,
+            self.settings.direction_id(
+                self.settings.sentence_direction
+            ),
         )
         self.assertIn(
-            "using Wipe from left instead",
+            "configured sentence entrance effect",
             output.getvalue(),
         )
+
+    def test_negative_visual_duration_is_rejected(self):
+        with self.assertRaisesRegex(
+            AnimationConfigurationError,
+            "ANIMATION_SENTENCE_DURATION.*negative",
+        ):
+            replace(
+                self.settings,
+                sentence_duration=-0.1,
+            )
+
+    def test_invalid_effect_name_is_rejected(self):
+        with self.assertRaisesRegex(
+            AnimationConfigurationError,
+            "ANIMATION_WORD_EFFECT.*invalid value",
+        ):
+            replace(
+                self.settings,
+                word_effect="spin",
+            )
 
     def test_progress_shapes_remain_excluded(self):
         for shape_name in (
@@ -480,8 +613,10 @@ class PresentationVisualAnimationTests(unittest.TestCase):
         spec = VisualAnimationSpec(
             shape_name="Optional Intro",
             semantic_element="meaning",
-            effect_id=self.planner.FADE_EFFECT,
-            duration=0.20,
+            effect_id=self.settings.effect_id(
+                self.settings.meaning_effect
+            ),
+            duration=self.settings.meaning_duration,
         )
         output = io.StringIO()
 

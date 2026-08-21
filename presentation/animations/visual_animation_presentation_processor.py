@@ -94,7 +94,6 @@ class VisualAnimationPresentationProcessor:
 
     ANIMATION_LEVEL_NONE = 0
     WITH_PREVIOUS = 2
-    NO_DELAY = 0.0
     MEDIA_PLAY_EFFECT = 83
 
     def __init__(
@@ -367,15 +366,15 @@ class VisualAnimationPresentationProcessor:
                     print(
                         f"  Slide {slide_index}: character "
                         f"reveal for '{spec.shape_name}' "
-                        "was unavailable; using Wipe from "
-                        f"left instead: {error}"
+                        "was unavailable; using the configured "
+                        f"sentence entrance effect instead: {error}"
                     )
 
             effect.Timing.TriggerType = (
                 self.WITH_PREVIOUS
             )
             effect.Timing.TriggerDelayTime = (
-                self.NO_DELAY
+                self.planner.settings.visual_delay
             )
             duration = spec.duration
 
