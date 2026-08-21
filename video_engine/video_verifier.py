@@ -111,9 +111,17 @@ class VideoVerifier:
             == "unavailable"
         ):
 
+            unavailable_reason = response.get(
+                "unavailable_reason",
+                "service_unavailable"
+            )
+
             return {
                 "verification_status":
                     "unavailable",
+
+                "unavailable_reason":
+                    unavailable_reason,
 
                 "score": 0,
 
@@ -129,7 +137,7 @@ class VideoVerifier:
 
                 "reason":
                     "Gemini video verification "
-                    "temporarily unavailable."
+                    f"unavailable: {unavailable_reason}."
             }
 
         text = self._clean_json(

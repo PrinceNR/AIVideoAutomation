@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from google.auth.exceptions import RefreshError
 from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -9,6 +10,10 @@ from config import (
     YOUTUBE_CLIENT_SECRET_PATH,
     YOUTUBE_TOKEN_PATH,
 )
+
+
+class YouTubeAuthenticationError(RuntimeError):
+    """Raised when YouTube authentication cannot be completed."""
 
 
 class YouTubeAuth:
@@ -57,31 +62,32 @@ class YouTubeAuth:
 
                 print("Refreshing YouTube login...")
 
-                credentials.refresh(
-                    Request()
-                )
+                try:
+                    credentials.refresh(
+                        Request()
+                    )
+                except RefreshError as error:
+                    if not self._is_invalid_grant(error):
+                        raise YouTubeAuthenticationError(
+                            "Could not refresh the saved YouTube "
+                            "login. Please try again later."
+                        ) from error
 
-            else:
-
-                if not self.client_secret_path.exists():
-
-                    raise FileNotFoundError(
-                        "YouTube OAuth credentials not found:\n"
-                        f"{self.client_secret_path}"
+                    print(
+                        "Saved YouTube login expired or was revoked."
+                    )
+                    print(
+                        "Starting YouTube authorization again..."
                     )
 
-                print(
-                    "Opening browser for YouTube authorization..."
-                )
+                    self.token_path.unlink(
+                        missing_ok=True
+                    )
 
-                flow = InstalledAppFlow.from_client_secrets_file(
-                    str(self.client_secret_path),
-                    self.SCOPES
-                )
+                    credentials = self._authorize()
 
-                credentials = flow.run_local_server(
-                    port=0
-                )
+            else:
+                credentials = self._authorize()
 
             # -------------------------------------
             # Save token
@@ -113,3 +119,47 @@ class YouTubeAuth:
         )
 
         return youtube
+
+    def _authorize(self):
+
+        if not self.client_secret_path.exists():
+            raise FileNotFoundError(
+                "YouTube OAuth credentials not found:\n"
+                f"{self.client_secret_path}"
+            )
+
+        print(
+            "Opening browser for YouTube authorization..."
+        )
+
+        try:
+            flow = InstalledAppFlow.from_client_secrets_file(
+                str(self.client_secret_path),
+                self.SCOPES
+            )
+
+            return flow.run_local_server(
+                port=0
+            )
+        except Exception as error:
+            raise YouTubeAuthenticationError(
+                "YouTube authorization did not complete. "
+                "Please try Stage 6 again."
+            ) from error
+
+    @staticmethod
+    def _is_invalid_grant(error):
+
+        text = " ".join(
+            str(value)
+            for value in (
+                error,
+                getattr(error, "args", None)
+            )
+            if value is not None
+        ).lower()
+
+        return (
+            "invalid_grant" in text
+            or "token has been expired or revoked" in text
+        )

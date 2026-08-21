@@ -34,3 +34,18 @@ class MediaPlanApplier:
             word.requires_motion = (
                 plan.requires_motion
             )
+
+            if plan.image_search_queries:
+                if len(plan.image_search_queries) != 3:
+                    raise ValueError(
+                        "Each media plan must include "
+                        "exactly 3 image search queries."
+                    )
+
+                word.search_query = (
+                    plan.image_search_queries[0]
+                )
+
+                word.image_keywords = list(
+                    plan.image_search_queries[1:]
+                )

@@ -1,4 +1,7 @@
 from pathlib import Path
+from presentation.image_compatibility import (
+    PresentationImageCompatibility,
+)
 from presentation.visual_slot_locator import (
     VisualSlotLocator
 )
@@ -8,6 +11,7 @@ class ImageProcessor:
 
     def __init__(self):
         self.locator = VisualSlotLocator()
+        self.image_compatibility = PresentationImageCompatibility()
 
     def process(
         self,
@@ -35,12 +39,16 @@ class ImageProcessor:
 
         original_name = picture.name
 
+        image_path = self.image_compatibility.prepare(
+            Path(word.default_image)
+        )
+
         picture._element.getparent().remove(
             picture._element
         )
 
         new_picture = slide.shapes.add_picture(
-            str(Path(word.default_image)),
+            str(image_path),
             left,
             top,
             width,

@@ -71,20 +71,14 @@ class ThumbnailGenerator:
             slot = self.slots[index]
 
             image_path = self._find_word_image(
-                lesson_folder,
-                word.word
+                word
             )
 
-            if image_path is not None:
-                self._paste_image(
-                    base,
-                    image_path,
-                    slot["image_box"]
-                )
-            else:
-                print(
-                    f"Image not found for word: {word.word}"
-                )
+            self._paste_image(
+                base,
+                image_path,
+                slot["image_box"]
+            )
 
             self._draw_word(
                 draw,
@@ -105,24 +99,23 @@ class ThumbnailGenerator:
 
     def _find_word_image(
         self,
-        lesson_folder,
-        word_name
+        word
     ):
-        word_folder = (
-            lesson_folder
-            / "images"
-            / self._normalize_name(word_name)
-        )
+        if not word.default_image:
+            raise FileNotFoundError(
+                f"No default image is selected for thumbnail word "
+                f"'{word.word}'."
+            )
 
-        if not word_folder.exists():
-            return None
+        image_path = Path(word.default_image)
 
-        for pattern in ("*.jpg", "*.jpeg", "*.png", "*.webp"):
-            files = sorted(word_folder.glob(pattern))
-            if files:
-                return files[0]
+        if not image_path.is_file():
+            raise FileNotFoundError(
+                f"Selected thumbnail image not found for word "
+                f"'{word.word}': {image_path}"
+            )
 
-        return None
+        return image_path
 
     def _paste_image(
         self,
@@ -134,16 +127,28 @@ class ThumbnailGenerator:
         width = right - left
         height = bottom - top
 
-        image = Image.open(image_path).convert("RGB")
+        with Image.open(image_path) as image:
+            image.load()
+            fitted = ImageOps.contain(
+                image,
+                (width, height),
+                method=Image.Resampling.LANCZOS
+            )
 
-        # Fit image nicely inside the slot
-        fitted = ImageOps.fit(
-            image,
-            (width, height),
-            method=Image.Resampling.LANCZOS
-        )
+        image_left = left + (width - fitted.width) // 2
+        image_top = top + (height - fitted.height) // 2
 
-        canvas.paste(fitted, (left, top))
+        if "A" in fitted.getbands():
+            canvas.paste(
+                fitted,
+                (image_left, image_top),
+                fitted.getchannel("A")
+            )
+        else:
+            canvas.paste(
+                fitted,
+                (image_left, image_top)
+            )
 
     def _draw_word(
         self,

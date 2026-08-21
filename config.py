@@ -103,13 +103,17 @@ THUMBNAIL_HEIGHT = 720
 # AUDIO / TIMELINE
 # =========================================================
 
-AUDIO_INITIAL_DELAY = 0.5
-AUDIO_GAP = 0.3
+AUDIO_INITIAL_DELAY = 0.7
+AUDIO_GAP = 0.5
 
 
 # =========================================================
 # YOUTUBE
 # =========================================================
+
+YOUTUBE_METADATA_MODEL = "gemini-flash-latest"
+
+YOUTUBE_METADATA_FALLBACK_MODEL = GEMINI_FALLBACK_MODEL
 
 YOUTUBE_PRIVACY_STATUS = "private"
 

@@ -1,7 +1,17 @@
 import json
 
-from ai.gemini_client import client
+from ai.gemini_verification_client import (
+    GeminiVerificationClient
+)
 from ai.metadata_prompts import YOUTUBE_METADATA_PROMPT
+from config import (
+    YOUTUBE_METADATA_MODEL,
+    YOUTUBE_METADATA_FALLBACK_MODEL
+)
+
+
+class MetadataTemporarilyUnavailableError(RuntimeError):
+    pass
 
 
 def generate_youtube_metadata(
@@ -38,12 +48,27 @@ def generate_youtube_metadata(
     # Gemini
     # -----------------------------------------
 
-    response = client.models.generate_content(
-        model="gemini-flash-latest",
-        contents=prompt
+    result = GeminiVerificationClient().generate(
+        contents=prompt,
+        primary_model=YOUTUBE_METADATA_MODEL,
+        fallback_model=YOUTUBE_METADATA_FALLBACK_MODEL,
+        task_name="YouTube metadata",
+        service_unavailable_retry_delay=1.0
     )
 
-    text = response.text.strip()
+    if result["status"] != "completed":
+        raise MetadataTemporarilyUnavailableError(
+            "YouTube metadata generation is temporarily "
+            "unavailable because all configured Gemini models "
+            "are unavailable. Please rerun Stage 5 later."
+        )
+
+    print(
+        "YouTube metadata generated with model: "
+        f"{result['model_used']}"
+    )
+
+    text = result["text"].strip()
 
     # -----------------------------------------
     # Remove possible Markdown JSON fences

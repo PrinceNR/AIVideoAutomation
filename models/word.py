@@ -43,6 +43,10 @@ class Word:
     video_folder: str | None = None
     default_video: str | None = None
 
+    media_recovery: dict = field(
+        default_factory=dict
+    )
+
     def get_audio(
         self,
         audio_name: str

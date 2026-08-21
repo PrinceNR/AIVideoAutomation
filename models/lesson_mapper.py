@@ -62,6 +62,11 @@ class LessonMapper:
                 video_folder=item.get("video_folder"),
 
                 default_video=item.get("default_video"),
+
+                media_recovery=item.get(
+                    "media_recovery",
+                    {}
+                ),
             )
 
 
@@ -72,5 +77,13 @@ class LessonMapper:
             topic=data.get("topic", ""),
             suggestions=data.get("suggestions", ""),
             words=words,
+            content_verification=data.get(
+                "content_verification",
+                {}
+            ),
+            stage1_readiness=data.get(
+                "stage1_readiness",
+                {}
+            ),
         )
 

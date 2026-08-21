@@ -4,6 +4,9 @@ from pathlib import Path
 from youtube_engine.youtube_uploader import (
     YouTubeUploader
 )
+from youtube_engine.youtube_auth import (
+    YouTubeAuthenticationError
+)
 
 
 class YouTubeUploadPipeline:
@@ -314,4 +317,8 @@ if __name__ == "__main__":
 
     pipeline = YouTubeUploadPipeline()
 
-    pipeline.run()
+    try:
+        pipeline.run()
+    except YouTubeAuthenticationError as error:
+        print(f"\nSTAGE 6 AUTHENTICATION ERROR: {error}")
+        raise SystemExit(1)

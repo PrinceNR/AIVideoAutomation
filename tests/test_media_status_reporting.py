@@ -122,6 +122,10 @@ class MediaStatusReportingTests(unittest.TestCase):
             )
 
             missing = make_word("missing")
+            missing.media_recovery = {
+                "attempted": True,
+                "status": "media_missing"
+            }
             MediaSelectionService(
                 video_selection_service=(
                     ResultVideoSelectionService(

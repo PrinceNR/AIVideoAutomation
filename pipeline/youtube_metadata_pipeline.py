@@ -3,7 +3,8 @@ from pathlib import Path
 
 from utils.file_manager import FileManager
 from ai.youtube_metadata_generator import (
-    generate_youtube_metadata
+    generate_youtube_metadata,
+    MetadataTemporarilyUnavailableError
 )
 
 
@@ -225,4 +226,8 @@ if __name__ == "__main__":
 
     pipeline = YouTubeMetadataPipeline()
 
-    pipeline.run()
+    try:
+        pipeline.run()
+    except MetadataTemporarilyUnavailableError as error:
+        print(f"\nSTAGE 5 ERROR: {error}")
+        raise SystemExit(1)

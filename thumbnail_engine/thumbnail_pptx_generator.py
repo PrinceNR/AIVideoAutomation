@@ -2,14 +2,21 @@ from pathlib import Path
 import re
 import tempfile
 
-from PIL import Image, ImageOps
+from PIL import Image
 from pptx import Presentation
 from config import THUMBNAIL_MAX_WORDS
+from presentation.image_compatibility import (
+    PresentationImageCompatibility
+)
 
 
 class ThumbnailPptxGenerator:
 
-    
+    def __init__(self):
+
+        self.image_compatibility = (
+            PresentationImageCompatibility()
+        )
 
     def generate(
         self,
@@ -89,44 +96,33 @@ class ThumbnailPptxGenerator:
                         word.word
                     )
 
-                    # Find first available image
+                    # Use the image selected for this lesson word.
                     image_path = self._find_word_image(
-                        lesson_folder,
-                        word.word
+                        word
                     )
-
-                    if image_path is None:
-
-                        print(
-                            f"  Image not found: {word.word}"
-                        )
-
-                        continue
 
                     print(
                         f"  Image: {image_path}"
                     )
 
-                    # Create properly cropped temporary image
-                    cropped_image = (
-                        temp_dir /
-                        f"thumbnail_{index}.jpg"
-                    )
-
-                    self._prepare_image(
+                    (
+                        prepared_image,
+                        image_left,
+                        image_top,
+                        image_width,
+                        image_height
+                    ) = self._prepare_image(
                         image_path=image_path,
-                        output_path=cropped_image,
-                        placeholder=image_placeholder,
-                        presentation=presentation
+                        placeholder=image_placeholder
                     )
 
-                    # Add image exactly over IMAGE_X
+                    # Center the complete image inside IMAGE_X.
                     slide.shapes.add_picture(
-                        str(cropped_image),
-                        image_placeholder.left,
-                        image_placeholder.top,
-                        image_placeholder.width,
-                        image_placeholder.height
+                        str(prepared_image),
+                        image_left,
+                        image_top,
+                        image_width,
+                        image_height
                     )
 
                 # -----------------------------------------
@@ -227,91 +223,72 @@ class ThumbnailPptxGenerator:
 
     def _find_word_image(
         self,
-        lesson_folder,
-        word_name
+        word
     ):
-
-        folder_name = self._normalize_name(
-            word_name
-        )
-
-        word_folder = (
-            lesson_folder
-            / "images"
-            / folder_name
-        )
-
-        if not word_folder.exists():
-            return None
-
-        extensions = [
-            "*.jpg",
-            "*.jpeg",
-            "*.png",
-            "*.webp"
-        ]
-
-        for extension in extensions:
-
-            images = sorted(
-                word_folder.glob(extension)
+        if not word.default_image:
+            raise FileNotFoundError(
+                f"No default image is selected for thumbnail word "
+                f"'{word.word}'."
             )
 
-            if images:
-                return images[0]
+        image_path = Path(word.default_image)
 
-        return None
+        if not image_path.is_file():
+            raise FileNotFoundError(
+                f"Selected thumbnail image not found for word "
+                f"'{word.word}': {image_path}"
+            )
+
+        return image_path
 
     # =================================================
-    # Crop image to same aspect ratio as placeholder
+    # Fit image inside placeholder without cropping
     # =================================================
 
     def _prepare_image(
         self,
         image_path,
-        output_path,
-        placeholder,
-        presentation
+        placeholder
     ):
 
-        image = Image.open(
-            image_path
-        ).convert("RGB")
-
-        # Calculate approximate output pixels using
-        # our 1280 x 720 thumbnail canvas.
-
-        target_width = max(
-            1,
-            round(
-                placeholder.width
-                / presentation.slide_width
-                * 1280
+        prepared_image = (
+            self.image_compatibility.prepare(
+                image_path
             )
         )
 
-        target_height = max(
+        with Image.open(prepared_image) as image:
+            source_width, source_height = image.size
+
+        scale = min(
+            placeholder.width / source_width,
+            placeholder.height / source_height
+        )
+
+        image_width = max(
             1,
-            round(
-                placeholder.height
-                / presentation.slide_height
-                * 720
-            )
+            round(source_width * scale)
+        )
+        image_height = max(
+            1,
+            round(source_height * scale)
         )
 
-        fitted = ImageOps.fit(
-            image,
-            (
-                target_width,
-                target_height
-            ),
-            method=Image.Resampling.LANCZOS,
-            centering=(0.5, 0.5)
+        image_left = (
+            placeholder.left
+            + (placeholder.width - image_width) // 2
+        )
+        image_top = (
+            placeholder.top
+            + (placeholder.height - image_height) // 2
         )
 
-        fitted.save(
-            output_path,
-            quality=95
+        return (
+            prepared_image,
+            image_left,
+            image_top,
+            image_width,
+            image_height
         )
 
     # =================================================

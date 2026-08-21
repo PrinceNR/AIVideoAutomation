@@ -6,16 +6,12 @@ from media_engine.media_type import (
 
 
 @dataclass
-class MediaPlan:
+class MediaRecoveryPlan:
 
-    preferred_type: MediaType
+    media_type: MediaType
 
     reason: str
 
-    requires_motion: bool = False
-
-    visual_concept: str = ""
-
-    image_search_queries: list[str] = field(
+    search_queries: list[str] = field(
         default_factory=list
     )

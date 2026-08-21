@@ -99,6 +99,7 @@ class VideoSelectionService:
         best_score = 0
         best_candidate = None
         verification_unavailable = False
+        verification_unavailable_reason = None
         verification_completed = False
         processing_failed = False
         verification_count = 0
@@ -204,6 +205,9 @@ class VideoSelectionService:
             )
 
             candidate_results = []
+            query_verification_unavailable = False
+            query_verification_completed = False
+            query_processing_failed = False
 
             for candidate_index, candidate in enumerate(
                 downloaded,
@@ -256,6 +260,12 @@ class VideoSelectionService:
                 except Exception as error:
 
                     processing_failed = True
+                    query_processing_failed = True
+
+                    print(
+                        "Video candidate processing failed: "
+                        f"{error}"
+                    )
 
                     candidate_results.append({
                         "source":
@@ -288,6 +298,13 @@ class VideoSelectionService:
 
                 if verification_status == "unavailable":
                     verification_unavailable = True
+                    query_verification_unavailable = True
+                    verification_unavailable_reason = (
+                        verification.get(
+                            "unavailable_reason",
+                            "service_unavailable"
+                        )
+                    )
 
                 score = (
                     verification.get(
@@ -354,7 +371,12 @@ class VideoSelectionService:
                         ),
 
                     "verification_status":
-                        verification_status
+                        verification_status,
+
+                    "unavailable_reason":
+                        verification.get(
+                            "unavailable_reason"
+                        )
                 }
 
                 candidate_results.append(
@@ -362,9 +384,10 @@ class VideoSelectionService:
                 )
 
                 if verification_status == "unavailable":
-                    continue
+                    break
 
                 verification_completed = True
+                query_verification_completed = True
 
                 if score > best_score:
 
@@ -442,6 +465,30 @@ class VideoSelectionService:
                             attempts
                     }
 
+            if query_verification_unavailable:
+                attempt_status = (
+                    "verification_unavailable"
+                )
+                attempt_message = (
+                    "Video verification unavailable "
+                    "for this query."
+                )
+            elif (
+                query_processing_failed
+                and not query_verification_completed
+            ):
+                attempt_status = "error"
+                attempt_message = (
+                    "Video candidate processing failed "
+                    "for this query."
+                )
+            else:
+                attempt_status = "rejected"
+                attempt_message = (
+                    "No candidate from this query "
+                    "passed video verification."
+                )
+
             attempts.append({
                 "attempt":
                     attempt_number,
@@ -450,16 +497,16 @@ class VideoSelectionService:
                     query,
 
                 "status":
-                    "rejected",
+                    attempt_status,
 
                 "candidates":
                     candidate_results
             })
 
-            print(
-                "No candidate from this query "
-                "passed video verification."
-            )
+            print(attempt_message)
+
+            if query_verification_unavailable:
+                break
 
         if verification_unavailable:
             status = "verification_unavailable"
@@ -482,6 +529,9 @@ class VideoSelectionService:
 
             "selected_query":
                 None,
+
+            "verification_unavailable_reason":
+                verification_unavailable_reason,
 
             "attempts":
                 attempts

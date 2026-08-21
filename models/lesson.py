@@ -12,3 +12,11 @@ class Lesson:
     suggestions: str = ""
 
     words: list[Word] = field(default_factory=list)
+
+    content_verification: dict = field(
+        default_factory=dict
+    )
+
+    stage1_readiness: dict = field(
+        default_factory=dict
+    )
