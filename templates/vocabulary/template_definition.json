@@ -11,7 +11,8 @@
             "processors": [
                 "text",
                 "image",
-                "audio"
+                "audio",
+                "progress"
             ],
 
             "audio": {
@@ -31,7 +32,8 @@
             "processors": [
                 "text",
                 "image",
-                "audio"
+                "audio",
+                "progress"
             ],
 
             "audio": {
@@ -49,7 +51,8 @@
             "processors": [
                 "text",
                 "image",
-                "audio"
+                "audio",
+                "progress"
             ],
 
             "audio": {
@@ -67,7 +70,8 @@
             "processors": [
                 "text",
                 "image",
-                "audio"
+                "audio",
+                "progress"
             ],
 
             "audio": {
