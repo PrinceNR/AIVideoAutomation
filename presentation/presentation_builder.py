@@ -6,6 +6,9 @@ from presentation.template_definition_loader import TemplateDefinitionLoader
 from presentation.postprocessor.pptx_post_processor import PptxPostProcessor
 from presentation.audio_presentation_processor import AudioPresentationProcessor
 from presentation.video_presentation_processor import VideoPresentationProcessor
+from presentation.animations.visual_animation_presentation_processor import (
+    VisualAnimationPresentationProcessor,
+)
 
 
 
@@ -22,6 +25,9 @@ class PresentationBuilder:
         self.post_processor = PptxPostProcessor() 
         self.audio_presentation_processor = AudioPresentationProcessor()
         self.video_presentation_processor = VideoPresentationProcessor()
+        self.visual_animation_processor = (
+            VisualAnimationPresentationProcessor()
+        )
 
     def build(
         self,
@@ -102,7 +108,11 @@ class PresentationBuilder:
             template_definition=template_definition
         )
 
+        # Append conservative visual effects only after
+        # audio timing and video embedding are complete.
+        self.visual_animation_processor.process(
+            pptx_path=output_path,
+            template_path=template_path,
+        )
+
         print("Presentation created successfully!")
-
-
-        
