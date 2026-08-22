@@ -84,6 +84,8 @@ PRESENTATION_TEMPLATE_PATH = (
     "templates/vocabulary_template_v3.pptx"
 )
 
+PRESENTATION_VERBOSE_LOGGING = False
+
 
 # =========================================================
 # PRESENTATION / VISUAL ANIMATION

@@ -1,4 +1,7 @@
 from pathlib import Path
+from presentation.presentation_logger import (
+    presentation_logger as log,
+)
 
 
 class AudioEmbedder:
@@ -36,19 +39,19 @@ class AudioEmbedder:
             Height=0
         )
 
-        print(
+        log.detail(
             f"Audio embedded: {audio_path.name}"
         )
 
-        print(
+        log.detail(
             f"  Shape: {media.Name}"
         )
 
-        print(
+        log.detail(
             f"  Type: {media.Type}"
         )
 
-        print(
+        log.detail(
             f"  ID: {media.Id}"
         )
 
@@ -84,26 +87,26 @@ class AudioEmbedder:
 
         actual_start_time = start_time
 
-        print(
+        log.detail(
             "  Animation effect created"
         )
 
-        print(
+        log.detail(
             f"  Timeline position: "
             f"{start_time:.2f}s"
         )
 
-        print(
+        log.detail(
             f"  Actual start time: "
             f"{actual_start_time:.2f}s"
         )
 
-        print(
+        log.detail(
             f"  Duration: "
             f"{duration:.2f}s"
         )
 
-        print(
+        log.detail(
             f"  Delay: "
             f"{delay:.2f}s"
         )

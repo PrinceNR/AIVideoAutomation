@@ -2,19 +2,26 @@ from pathlib import Path
 from presentation.presentation_builder import PresentationBuilder
 from utils.file_manager import FileManager
 from config import PRESENTATION_TEMPLATE_PATH
+from presentation.presentation_logger import (
+    presentation_logger as log,
+)
 
 
 class PresentationPipeline:
 
-    def __init__(self):
-        self.file_manager = FileManager()
-        self.builder = PresentationBuilder()
+    def __init__(
+        self,
+        file_manager=None,
+        builder=None,
+    ):
+        self.file_manager = file_manager or FileManager()
+        self.builder = builder or PresentationBuilder()
 
     def run(self, lesson_path=None):
 
-        print("\n========================================")
-        print("STAGE 2 - PRESENTATION GENERATION")
-        print("========================================")
+        log.info("\n========================================")
+        log.info("STAGE 2 - PRESENTATION GENERATION")
+        log.info("========================================")
 
         # -------------------------------------------------
         # Get lesson
@@ -25,7 +32,7 @@ class PresentationPipeline:
         if lesson_path is not None:
             lesson_path = Path(lesson_path)
 
-            print(f"Using lesson: {lesson_path}")
+            log.detail(f"Using lesson: {lesson_path}")
 
         # If running Stage 2 independently,
         # find the latest lesson.
@@ -33,7 +40,7 @@ class PresentationPipeline:
             lesson_path = self._find_latest_lesson()
 
             if lesson_path is not None:
-                print(f"Latest lesson: {lesson_path}")
+                log.detail(f"Latest lesson: {lesson_path}")
 
         if lesson_path is None or not lesson_path.exists():
             raise FileNotFoundError(
@@ -52,8 +59,13 @@ class PresentationPipeline:
             lesson_path
         )
 
-        print(f"Topic: {lesson_folder.name}")
-        print(f"Words: {len(lesson.words)}")
+        slide_count = self.builder.get_slide_count(
+            lesson
+        )
+
+        log.info(f"\nTopic: {lesson_folder.name}")
+        log.info(f"Words: {len(lesson.words)}")
+        log.info(f"Slides: {slide_count}")
 
         # -------------------------------------------------
         # Template
@@ -86,23 +98,40 @@ class PresentationPipeline:
             f"{lesson_folder.name}.pptx"
         )
 
-        print(f"Output: {output_path}")
+        log.detail(f"Output: {output_path}")
 
         # -------------------------------------------------
         # Build presentation
         # -------------------------------------------------
 
-        self.builder.build(
+        summary = self.builder.build(
             lesson,
             template_path,
             output_path
         )
 
-        print("\n========================================")
-        print("STAGE 2 COMPLETED")
-        print("========================================")
+        log.info("\nRendering slides... OK")
+        log.info("Progress bars... OK")
+        log.info(
+            "Embedding audio... "
+            f"{summary.audio_files} files"
+        )
+        log.info(
+            "Embedding videos... "
+            f"{summary.video_clips} clips"
+        )
+        log.info(
+            "Applying visual animations... "
+            f"{summary.animation_slides} slides"
+        )
+        log.info("Applying slide timings... OK")
+        log.info("\nPresentation created successfully!")
 
-        print(f"Presentation: {output_path}")
+        log.info("\n========================================")
+        log.info("STAGE 2 COMPLETED")
+        log.info("========================================")
+
+        log.info(f"\nOutput: {output_path}")
 
         return output_path
 

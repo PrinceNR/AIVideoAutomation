@@ -9,6 +9,9 @@ from presentation.embedders.video_embedder import (
 from presentation.com_visual_slot_locator import (
     ComVisualSlotLocator
 )
+from presentation.presentation_logger import (
+    presentation_logger as log,
+)
 
 
 class VideoPresentationProcessor:
@@ -25,9 +28,11 @@ class VideoPresentationProcessor:
     ):
         pptx_path = Path(pptx_path).resolve()
 
-        print("=" * 70)
-        print("COM VIDEO EMBEDDING")
-        print("=" * 70)
+        log.detail("=" * 70)
+        log.detail("COM VIDEO EMBEDDING")
+        log.detail("=" * 70)
+
+        embedded_video_count = 0
 
         with PowerPointController(visible=True) as ppt:
 
@@ -40,7 +45,7 @@ class VideoPresentationProcessor:
 
             for word in lesson.words:
 
-                print(f"\nWord: {word.word}")
+                log.detail(f"\nWord: {word.word}")
 
                 for slide_definition in template_definition.slides:
 
@@ -52,18 +57,23 @@ class VideoPresentationProcessor:
                         word,
                         slide_definition
                     ):
-                        self._replace_picture_with_video(
+                        was_embedded = self._replace_picture_with_video(
                             slide=slide,
                             word=word,
                             slide_index=slide_index,
                             slide_type=slide_definition.type
                         )
 
+                        if was_embedded:
+                            embedded_video_count += 1
+
                     slide_index += 1
 
             ppt.save()
 
-        print("\nCOM video embedding completed.")
+        log.detail("\nCOM video embedding completed.")
+
+        return embedded_video_count
 
     def _should_embed_video(
         self,
@@ -104,12 +114,12 @@ class VideoPresentationProcessor:
         )
 
         if picture is None:
-            print(
+            log.warning(
                 f"  Slide {slide_index} "
                 f"({slide_type}): "
                 f"no image placeholder found."
             )
-            return
+            return False
 
         left = picture.left
         top = picture.top
@@ -136,11 +146,13 @@ class VideoPresentationProcessor:
             original_z_order
         )
 
-        print(
+        log.detail(
             f"  Slide {slide_index} "
             f"({slide_type}): "
             f"embedded video -> {word.default_video}"
         )
+
+        return True
 
     @staticmethod
     def _restore_z_order(

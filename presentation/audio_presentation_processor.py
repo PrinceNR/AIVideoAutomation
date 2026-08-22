@@ -6,6 +6,9 @@ from presentation.audio_duration_calculator import AudioDurationCalculator
 from presentation.slide_timing.slide_timing_controller import SlideTimingController
 from presentation.timeline.slide_timeline import SlideTimeline
 from config import NO_AUDIO_SLIDE_DURATION
+from presentation.presentation_logger import (
+    presentation_logger as log,
+)
 
 
 class AudioPresentationProcessor:
@@ -25,9 +28,12 @@ class AudioPresentationProcessor:
 
         pptx_path = Path(pptx_path).resolve()
 
-        print("=" * 70)
-        print("COM AUDIO EMBEDDING")
-        print("=" * 70)
+        log.detail("=" * 70)
+        log.detail("COM AUDIO EMBEDDING")
+        log.detail("=" * 70)
+
+        embedded_audio_count = 0
+        timed_slide_count = 0
 
         with PowerPointController(visible=True) as ppt:
 
@@ -41,7 +47,7 @@ class AudioPresentationProcessor:
 
             for word in lesson.words:
 
-                print(
+                log.detail(
                     f"\nWord {word.word}"
                 )
 
@@ -51,7 +57,7 @@ class AudioPresentationProcessor:
                         slide_index
                     )
 
-                    print(
+                    log.detail(
                         f"  Slide {slide_index}: "
                         f"{slide_definition.type}"
                     )
@@ -77,7 +83,7 @@ class AudioPresentationProcessor:
 
                         if audio_path is None:
 
-                            print(
+                            log.warning(
                                 f"    Audio not found: "
                                 f"{audio_name}"
                             )
@@ -105,17 +111,17 @@ class AudioPresentationProcessor:
                             else timeline.audio_gap
                         )
 
-                        print(
+                        log.detail(
                             f"    Embedding: "
                             f"{audio_name}.mp3"
                         )
 
-                        print(
+                        log.detail(
                             f"      Start: "
                             f"{event.start_time:.2f}s"
                         )
 
-                        print(
+                        log.detail(
                             f"      Duration: "
                             f"{event.duration:.2f}s"
                         )
@@ -128,6 +134,7 @@ class AudioPresentationProcessor:
                             duration=duration,
                             delay=delay
                         )
+                        embedded_audio_count += 1
 
                         # self.audio_embedder.embed(
                         #     slide,
@@ -155,8 +162,9 @@ class AudioPresentationProcessor:
                         slide,
                         slide_duration
                     )
+                    timed_slide_count += 1
 
-                    print(
+                    log.detail(
                         f"      Slide Duration: "
                         f"{slide_duration:.2f}s"
                     )
@@ -165,6 +173,11 @@ class AudioPresentationProcessor:
 
             ppt.save()
 
-        print(
+        log.detail(
             "\nCOM audio embedding completed."
         )
+
+        return {
+            "audio_files": embedded_audio_count,
+            "timed_slides": timed_slide_count,
+        }

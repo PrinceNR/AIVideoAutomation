@@ -193,6 +193,9 @@
 from presentation.audio_duration_calculator import (
     AudioDurationCalculator
 )
+from presentation.presentation_logger import (
+    presentation_logger as log,
+)
 
 
 class AudioProcessor:
@@ -226,7 +229,7 @@ class AudioProcessor:
 
             if audio_path is None:
 
-                print(
+                log.warning(
                     f"Audio not found: "
                     f"{audio_name}"
                 )
@@ -248,18 +251,18 @@ class AudioProcessor:
                 duration
             )
 
-            print(
+            log.detail(
                 f"Audio scheduled: "
                 f"{audio_name}.mp3 "
                 f"({duration:.2f}s)"
             )
 
-            print(
+            log.detail(
                 f"  Start: "
                 f"{event.start_time:.2f}s"
             )
 
-            print(
+            log.detail(
                 f"  Duration: "
                 f"{event.duration:.2f}s"
             )

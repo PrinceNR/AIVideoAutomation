@@ -7,6 +7,9 @@ from presentation.animations.visual_animation_planner import (
 from presentation.automation.powerpoint_controller import (
     PowerPointController,
 )
+from presentation.presentation_logger import (
+    presentation_logger as log,
+)
 
 
 class ComShapeNameLocator:
@@ -136,15 +139,17 @@ class VisualAnimationPresentationProcessor:
         )
 
         if not template_plans:
-            print(
+            log.warning(
                 "No template slides were available for "
                 "visual animation planning."
             )
-            return
+            return 0
 
-        print("=" * 70)
-        print("COM VISUAL ANIMATIONS")
-        print("=" * 70)
+        log.detail("=" * 70)
+        log.detail("COM VISUAL ANIMATIONS")
+        log.detail("=" * 70)
+
+        processed_slide_count = 0
 
         with self.controller_factory(
             visible=True
@@ -178,12 +183,15 @@ class VisualAnimationPresentationProcessor:
                     slide_index,
                     slide_within_word,
                 )
+                processed_slide_count += 1
 
             ppt.save()
 
-        print(
+        log.detail(
             "\nCOM visual animation processing completed."
         )
+
+        return processed_slide_count
 
     def process_slide(
         self,
@@ -220,7 +228,7 @@ class VisualAnimationPresentationProcessor:
                         f"{error}"
                     ) from error
 
-                print(
+                log.warning(
                     f"  Slide {slide_index}: visual shape "
                     f"lookup for '{spec.shape_name}' "
                     f"failed safely: {error}"
@@ -237,7 +245,7 @@ class VisualAnimationPresentationProcessor:
                 )
 
             if not matches:
-                print(
+                log.warning(
                     f"  Slide {slide_index}: optional visual "
                     f"shape '{spec.shape_name}' "
                     "was not found; animation skipped."
@@ -245,7 +253,7 @@ class VisualAnimationPresentationProcessor:
                 continue
 
             if len(matches) > 1:
-                print(
+                log.warning(
                     f"  Slide {slide_index}: optional visual "
                     f"shape name '{spec.shape_name}' matched "
                     f"{len(matches)} shapes; animation skipped."
@@ -330,7 +338,7 @@ class VisualAnimationPresentationProcessor:
                 transition_spec.speed
             )
         except Exception as error:
-            print(
+            log.warning(
                 f"  Slide {slide_index}: transition "
                 f"could not be applied: {error}"
             )
@@ -376,7 +384,7 @@ class VisualAnimationPresentationProcessor:
             effect.Timing.TriggerDelayTime = trigger_delay
             effect.Timing.Duration = duration
 
-            print(
+            log.detail(
                 f"  Slide {slide_index}: "
                 f"{spec.semantic_element} -> "
                 f"{spec.shape_name}"
@@ -389,7 +397,7 @@ class VisualAnimationPresentationProcessor:
                 except Exception:
                     pass
 
-            print(
+            log.warning(
                 f"  Slide {slide_index}: visual animation "
                 f"for '{spec.shape_name}' failed safely: "
                 f"{error}"
@@ -459,7 +467,7 @@ class VisualAnimationPresentationProcessor:
             effect.Timing.TriggerDelayTime = trigger_delay
             effect.Timing.Duration = duration
 
-            print(
+            log.detail(
                 f"  Slide {slide_index}: "
                 f"{spec.shape_name} -> reveal mask "
                 f"({duration:.2f}s)."

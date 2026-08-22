@@ -1,5 +1,8 @@
 from pathlib import Path
 import zipfile
+from presentation.presentation_logger import (
+    presentation_logger as log,
+)
 
 
 class PptxRepacker:
@@ -25,6 +28,6 @@ class PptxRepacker:
                         file.relative_to(folder)
                     )
 
-        print(
+        log.detail(
             f"Repacked: {output_pptx}"
         )

@@ -1,5 +1,8 @@
 from pathlib import Path
 import re
+from presentation.presentation_logger import (
+    presentation_logger as log,
+)
 
 
 class MediaTimingPatcher:
@@ -23,6 +26,6 @@ class MediaTimingPatcher:
             if "<p:timing>" not in xml:
                 continue
 
-            print(
+            log.detail(
                 f"Processing {slide_file.name}"
             )

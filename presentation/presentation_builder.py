@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+
 from presentation.template_loader import TemplateLoader
 from presentation.slide_group_renderer import SlideGroupRenderer
 from presentation.slide_group_duplicator import SlideGroupDuplicator
@@ -9,6 +11,18 @@ from presentation.video_presentation_processor import VideoPresentationProcessor
 from presentation.animations.visual_animation_presentation_processor import (
     VisualAnimationPresentationProcessor,
 )
+from presentation.presentation_logger import (
+    presentation_logger as log,
+)
+
+
+@dataclass(frozen=True)
+class PresentationBuildSummary:
+    slides: int
+    audio_files: int
+    video_clips: int
+    animation_slides: int
+    timed_slides: int
 
 
 
@@ -29,22 +43,32 @@ class PresentationBuilder:
             VisualAnimationPresentationProcessor()
         )
 
+    def get_slide_count(self, lesson):
+        template_definition = self.template_loader.load(
+            "templates/vocabulary/template_definition.json"
+        )
+
+        return (
+            len(lesson.words)
+            * template_definition.slides_per_word
+        )
+
     def build(
         self,
         lesson,
         template_path,
         output_path
     ):
+        template_definition = self.template_loader.load(
+            "templates/vocabulary/template_definition.json"
+        )
         presentation = self.loader.load(
-        template_path
+            template_path
         )
 
-        template_definition = self.template_loader.load(
-        "templates/vocabulary/template_definition.json"
-        )
-        print(
-            "Slides per word:",
-            template_definition.slides_per_word
+        log.detail(
+            "Slides per word: "
+            f"{template_definition.slides_per_word}"
         )
     
         # Duplicate remaining groups
@@ -86,23 +110,19 @@ class PresentationBuilder:
             output_path
         )
 
-        print("Base presentation created.")
+        log.detail("Base presentation created.")
 
         # -------------------------------------------------
         # Embed audio and apply slide timings
         # -------------------------------------------------
 
-        template_definition = self.template_loader.load(
-            "templates/vocabulary/template_definition.json"
-        )
-
-        self.audio_presentation_processor.process(
+        audio_summary = self.audio_presentation_processor.process(
             pptx_path=output_path,
             lesson=lesson,
             template_definition=template_definition
         )
 
-        self.video_presentation_processor.process(
+        video_clips = self.video_presentation_processor.process(
             pptx_path=output_path,
             lesson=lesson,
             template_definition=template_definition
@@ -110,9 +130,20 @@ class PresentationBuilder:
 
         # Append conservative visual effects only after
         # audio timing and video embedding are complete.
-        self.visual_animation_processor.process(
+        animation_slides = self.visual_animation_processor.process(
             pptx_path=output_path,
             template_path=template_path,
         )
 
-        print("Presentation created successfully!")
+        log.detail("Presentation created successfully!")
+
+        return PresentationBuildSummary(
+            slides=(
+                len(lesson.words)
+                * template_definition.slides_per_word
+            ),
+            audio_files=audio_summary["audio_files"],
+            video_clips=video_clips,
+            animation_slides=animation_slides,
+            timed_slides=audio_summary["timed_slides"],
+        )

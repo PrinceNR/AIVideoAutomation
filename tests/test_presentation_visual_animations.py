@@ -706,7 +706,11 @@ class PresentationVisualAnimationTests(unittest.TestCase):
     def test_actual_reveal_mask_is_reported_once(self):
         output = io.StringIO()
 
-        with redirect_stdout(output):
+        with patch.object(
+            project_config,
+            "PRESENTATION_VERBOSE_LOGGING",
+            True,
+        ), redirect_stdout(output):
             self._process_sentence()
 
         self.assertEqual(output.getvalue().count("PAST_SENTENCE"), 1)

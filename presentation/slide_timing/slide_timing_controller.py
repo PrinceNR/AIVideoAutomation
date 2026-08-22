@@ -1,3 +1,8 @@
+from presentation.presentation_logger import (
+    presentation_logger as log,
+)
+
+
 class SlideTimingController:
 
     def set_slide_duration(
@@ -17,6 +22,6 @@ class SlideTimingController:
         slide.SlideShowTransition.AdvanceOnTime = True
         slide.SlideShowTransition.AdvanceTime = duration
 
-        print(
+        log.detail(
             f"  Slide timing set: {duration:.2f}s"
         )

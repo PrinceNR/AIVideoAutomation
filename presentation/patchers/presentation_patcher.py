@@ -2,6 +2,9 @@ from pathlib import Path
 from presentation.patchers.relationship_patcher import RelationshipPatcher
 from presentation.patchers.slide_xml_patcher import SlideXmlPatcher
 from presentation.patchers.media_timing_patcher import MediaTimingPatcher
+from presentation.presentation_logger import (
+    presentation_logger as log,
+)
 
 
 class PresentationPatcher:
@@ -16,7 +19,7 @@ class PresentationPatcher:
         self,
         temp_folder: Path
     ):
-        
+
         slides_folder = (
             temp_folder
             / "ppt"
@@ -28,12 +31,10 @@ class PresentationPatcher:
             / "_rels"
         )
 
-        print(slides_folder)
+        log.detail(str(slides_folder))
 
-        print(rels_folder)
+        log.detail(str(rels_folder))
 
         self.media_timing_patcher.patch(
             slides_folder
         )
-
-        

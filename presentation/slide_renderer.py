@@ -1,6 +1,9 @@
 from pathlib import Path
 from presentation.processor_manager import ProcessorManager
 from presentation.timeline.slide_timeline import SlideTimeline
+from presentation.presentation_logger import (
+    presentation_logger as log,
+)
 
 class SlideRenderer:
 
@@ -29,7 +32,9 @@ class SlideRenderer:
             )
         )
 
-        print(f"Rendering {slide_definition.type}")
+        log.detail(
+            f"Rendering {slide_definition.type}"
+        )
 
         for processor_name in slide_definition.processors:
 
@@ -46,20 +51,15 @@ class SlideRenderer:
                 timeline
             )
 
-        print("Timeline")
+        log.detail("Timeline")
 
         for event in timeline.audio_events:
 
-            print(
-                event.start_time,
-                event.file
+            log.detail(
+                f"{event.start_time} {event.file}"
             )
-        print(
-            "Slide Duration:",
-            round(
-                timeline.duration,
-                2
-            ),
-            "seconds"
+        log.detail(
+            f"Slide Duration: "
+            f"{timeline.duration:.2f} seconds"
         )
         return timeline

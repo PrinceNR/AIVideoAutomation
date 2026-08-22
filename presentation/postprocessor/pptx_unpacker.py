@@ -1,6 +1,9 @@
 from pathlib import Path
 import shutil
 import zipfile
+from presentation.presentation_logger import (
+    presentation_logger as log,
+)
 
 
 class PptxUnpacker:
@@ -26,6 +29,6 @@ class PptxUnpacker:
                 output_folder
             )
 
-        print(
+        log.detail(
             f"Unpacked: {pptx_file}"
         )
