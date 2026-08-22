@@ -95,12 +95,19 @@ class VisualAnimationPresentationProcessor:
     ANIMATION_LEVEL_NONE = 0
     WITH_PREVIOUS = 2
     MEDIA_PLAY_EFFECT = 83
+    CUSTOM_EFFECT = 0
+    MOTION_BEHAVIOR = 1
+    RECTANGLE_SHAPE = 1
+    BRING_TO_FRONT = 0
+    SOLID_FILL = 1
+    MSO_FALSE = 0
 
     def __init__(
         self,
         planner=None,
         locator=None,
         controller_factory=None,
+        debug=False,
     ):
         self.planner = (
             planner
@@ -114,6 +121,7 @@ class VisualAnimationPresentationProcessor:
             controller_factory
             or PowerPointController
         )
+        self.debug = debug
 
     def process(
         self,
@@ -246,14 +254,25 @@ class VisualAnimationPresentationProcessor:
 
             shape = matches[0]
 
-            self._append_effect(
-                sequence,
-                shape,
-                spec,
-                slide_index,
-                insertion_index,
-                anchor_duration,
-            )
+            if spec.reveal_mode == "reveal_mask":
+                self._append_reveal_mask_effect(
+                    slide,
+                    sequence,
+                    shape,
+                    spec,
+                    slide_index,
+                    insertion_index,
+                    anchor_duration,
+                )
+            else:
+                self._append_effect(
+                    sequence,
+                    shape,
+                    spec,
+                    slide_index,
+                    insertion_index,
+                    anchor_duration,
+                )
 
     def _automatic_start_group(
         self,
@@ -328,52 +347,19 @@ class VisualAnimationPresentationProcessor:
         effect = None
 
         try:
-            if insertion_index is None:
-                effect = sequence.AddEffect(
-                    shape,
-                    spec.effect_id,
-                    self.ANIMATION_LEVEL_NONE,
-                    self.WITH_PREVIOUS,
-                )
-            else:
-                effect = sequence.AddEffect(
-                    shape,
-                    spec.effect_id,
-                    self.ANIMATION_LEVEL_NONE,
-                    self.WITH_PREVIOUS,
-                    insertion_index,
-                )
-
-            if spec.text_unit_effect is not None:
-                try:
-                    converted_effect = (
-                        sequence.ConvertToTextUnitEffect(
-                            effect,
-                            spec.text_unit_effect,
-                        )
-                    )
-
-                    if converted_effect is not None:
-                        effect = converted_effect
-
-                    print(
-                        f"  Slide {slide_index}: "
-                        f"{spec.shape_name} uses "
-                        "character reveal."
-                    )
-
-                except Exception as error:
-                    print(
-                        f"  Slide {slide_index}: character "
-                        f"reveal for '{spec.shape_name}' "
-                        "was unavailable; using the configured "
-                        f"sentence entrance effect instead: {error}"
-                    )
-
-            effect.Timing.TriggerType = (
-                self.WITH_PREVIOUS
+            effect = self._add_effect(
+                sequence,
+                shape,
+                spec.effect_id,
+                insertion_index,
             )
-            effect.Timing.TriggerDelayTime = (
+
+            if spec.direction is not None:
+                effect.EffectParameters.Direction = (
+                    spec.direction
+                )
+
+            trigger_delay = (
                 self.planner.settings.visual_delay
             )
             duration = spec.duration
@@ -384,12 +370,11 @@ class VisualAnimationPresentationProcessor:
                     anchor_duration,
                 )
 
+            effect.Timing.TriggerType = (
+                self.WITH_PREVIOUS
+            )
+            effect.Timing.TriggerDelayTime = trigger_delay
             effect.Timing.Duration = duration
-
-            if spec.direction is not None:
-                effect.EffectParameters.Direction = (
-                    spec.direction
-                )
 
             print(
                 f"  Slide {slide_index}: "
@@ -409,3 +394,237 @@ class VisualAnimationPresentationProcessor:
                 f"for '{spec.shape_name}' failed safely: "
                 f"{error}"
             )
+
+    def _append_reveal_mask_effect(
+        self,
+        slide,
+        sequence,
+        sentence_shape,
+        spec,
+        slide_index,
+        insertion_index,
+        anchor_duration,
+    ):
+        mask = None
+        effect = None
+
+        try:
+            if spec.reveal_direction != "left_to_right":
+                raise AnimationTemplateError(
+                    "Sentence reveal mask supports only the "
+                    "configured left-to-right direction."
+                )
+
+            mask = self._create_reveal_mask(
+                slide,
+                sentence_shape,
+                spec,
+            )
+            effect = self._add_effect(
+                sequence,
+                mask,
+                spec.effect_id,
+                insertion_index,
+            )
+            behavior = effect.Behaviors.Add(
+                self.MOTION_BEHAVIOR
+            )
+            slide_width = self._slide_width(slide)
+            reveal_distance = (
+                self._motion_distance_percent(
+                    mask.Width,
+                    slide_width,
+                )
+            )
+            behavior.MotionEffect.ByX = reveal_distance
+            behavior.MotionEffect.ByY = 0.0
+
+            trigger_delay = (
+                self.planner.settings.sentence_delay
+            )
+            duration = spec.duration
+
+            if anchor_duration is not None:
+                duration = min(
+                    duration,
+                    max(
+                        0.0,
+                        anchor_duration - trigger_delay,
+                    ),
+                )
+
+            effect.Timing.TriggerType = (
+                self.WITH_PREVIOUS
+            )
+            effect.Timing.TriggerDelayTime = trigger_delay
+            effect.Timing.Duration = duration
+
+            print(
+                f"  Slide {slide_index}: "
+                f"{spec.shape_name} -> reveal mask "
+                f"({duration:.2f}s)."
+            )
+
+        except Exception as error:
+            self._delete_effect(effect)
+            self._delete_shape(mask)
+            raise AnimationTemplateError(
+                "Rendered presentation slide "
+                f"{slide_index} could not construct a safe "
+                f"reveal mask for '{spec.shape_name}': {error}"
+            ) from error
+
+    def _create_reveal_mask(
+        self,
+        slide,
+        sentence_shape,
+        spec,
+    ):
+        mask_name = (
+            f"{spec.shape_name}_REVEAL_MASK"
+        )
+
+        if self.locator.find_all(slide, mask_name):
+            raise AnimationTemplateError(
+                "Rendered presentation already contains "
+                f"generated shape '{mask_name}'."
+            )
+
+        left = float(sentence_shape.Left)
+        top = float(sentence_shape.Top)
+        width = float(sentence_shape.Width)
+        height = float(sentence_shape.Height)
+
+        if width <= 0 or height <= 0:
+            raise AnimationTemplateError(
+                f"Semantic sentence shape '{spec.shape_name}' "
+                "must have positive width and height."
+            )
+
+        mask = slide.Shapes.AddShape(
+            self.RECTANGLE_SHAPE,
+            left,
+            top,
+            width,
+            height,
+        )
+        mask.Name = mask_name
+        mask.Fill.Solid()
+        mask.Fill.ForeColor.RGB = (
+            self._mask_fill_color(
+                slide,
+                spec.mask_color,
+            )
+        )
+        mask.Fill.Transparency = 0.0
+        mask.Line.Visible = self.MSO_FALSE
+        mask.ZOrder(self.BRING_TO_FRONT)
+
+        return mask
+
+    def _mask_fill_color(
+        self,
+        slide,
+        configured_color,
+    ):
+        try:
+            background_fill = slide.Background.Fill
+
+            if background_fill.Type == self.SOLID_FILL:
+                return int(
+                    background_fill.ForeColor.RGB
+                )
+        except Exception:
+            pass
+
+        if configured_color is None:
+            raise AnimationTemplateError(
+                "Sentence reveal mask has neither a usable "
+                "slide background color nor a configured color."
+            )
+
+        return int(configured_color)
+
+    @staticmethod
+    def _motion_distance_percent(
+        mask_width,
+        slide_width,
+    ):
+        mask_width = float(mask_width)
+        slide_width = float(slide_width)
+
+        if mask_width <= 0 or slide_width <= 0:
+            raise AnimationTemplateError(
+                "Sentence reveal motion requires positive mask "
+                "and slide widths."
+            )
+
+        return (mask_width / slide_width) * 100.0
+
+    @staticmethod
+    def _slide_width(slide):
+        width_getters = (
+            lambda: slide.Parent.PageSetup.SlideWidth,
+            lambda: slide.Parent.Parent.PageSetup.SlideWidth,
+            lambda: (
+                slide.Application.ActivePresentation
+                .PageSetup.SlideWidth
+            ),
+        )
+
+        for get_width in width_getters:
+            try:
+                width = float(get_width())
+
+                if width > 0:
+                    return width
+            except Exception:
+                continue
+
+        raise AnimationTemplateError(
+            "Could not determine the PowerPoint slide width "
+            "for sentence reveal motion."
+        )
+
+    def _add_effect(
+        self,
+        sequence,
+        shape,
+        effect_id,
+        insertion_index,
+    ):
+        if insertion_index is None:
+            return sequence.AddEffect(
+                shape,
+                effect_id,
+                self.ANIMATION_LEVEL_NONE,
+                self.WITH_PREVIOUS,
+            )
+
+        return sequence.AddEffect(
+            shape,
+            effect_id,
+            self.ANIMATION_LEVEL_NONE,
+            self.WITH_PREVIOUS,
+            insertion_index,
+        )
+
+    @staticmethod
+    def _delete_effect(effect):
+        if effect is None:
+            return
+
+        try:
+            effect.Delete()
+        except Exception:
+            pass
+
+    @staticmethod
+    def _delete_shape(shape):
+        if shape is None:
+            return
+
+        try:
+            shape.Delete()
+        except Exception:
+            pass

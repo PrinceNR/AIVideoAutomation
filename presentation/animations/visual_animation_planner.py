@@ -16,7 +16,9 @@ class VisualAnimationSpec:
     effect_id: int
     duration: float
     direction: int | None = None
-    text_unit_effect: int | None = None
+    reveal_mode: str | None = None
+    reveal_direction: str | None = None
+    mask_color: int | None = None
     required: bool = False
 
 
@@ -334,14 +336,13 @@ class VisualAnimationPlanner:
         return VisualAnimationSpec(
             shape_name=shape_name,
             semantic_element=semantic_element,
-            effect_id=self.settings.effect_id(
-                self.settings.sentence_effect
-            ),
+            effect_id=self.settings.sentence_effect_id(),
             duration=self.settings.sentence_duration,
-            direction=self.settings.direction_id(
+            reveal_mode=self.settings.sentence_effect,
+            reveal_direction=(
                 self.settings.sentence_direction
             ),
-            text_unit_effect=self.settings.text_unit_effect(),
+            mask_color=self.settings.sentence_mask_rgb(),
             required=True,
         )
 

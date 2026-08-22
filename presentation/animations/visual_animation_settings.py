@@ -32,9 +32,12 @@ class VisualAnimationSettings:
         "left": 4,
     }
 
-    TEXT_UNIT_EFFECTS = {
-        "wipe": None,
-        "character": 1,
+    SENTENCE_EFFECT_IDS = {
+        "reveal_mask": 0,
+    }
+
+    SENTENCE_DIRECTIONS = {
+        "left_to_right",
     }
 
     new_word_transition: str
@@ -60,10 +63,11 @@ class VisualAnimationSettings:
     image_effect: str
     image_duration: float
 
-    sentence_reveal_mode: str
     sentence_effect: str
     sentence_duration: float
-    sentence_direction: str | None
+    sentence_direction: str
+    sentence_delay: float
+    sentence_mask_color: str
 
     visual_delay: float
 
@@ -100,7 +104,6 @@ class VisualAnimationSettings:
                 self.verb_form_effect,
             ),
             ("ANIMATION_IMAGE_EFFECT", self.image_effect),
-            ("ANIMATION_SENTENCE_EFFECT", self.sentence_effect),
         ):
             self._validate_name(
                 setting_name,
@@ -114,16 +117,18 @@ class VisualAnimationSettings:
             self.DIRECTION_IDS,
         )
         self._validate_name(
-            "ANIMATION_SENTENCE_DIRECTION",
-            self.sentence_direction,
-            self.DIRECTION_IDS,
+            "ANIMATION_SENTENCE_EFFECT",
+            self.sentence_effect,
+            self.SENTENCE_EFFECT_IDS,
         )
         self._validate_name(
-            "ANIMATION_SENTENCE_REVEAL_MODE",
-            self.sentence_reveal_mode,
-            self.TEXT_UNIT_EFFECTS,
+            "ANIMATION_SENTENCE_DIRECTION",
+            self.sentence_direction,
+            self.SENTENCE_DIRECTIONS,
         )
-
+        self._parse_mask_color(
+            self.sentence_mask_color
+        )
         for setting_name, value in (
             ("ANIMATION_WORD_DURATION", self.word_duration),
             (
@@ -143,6 +148,10 @@ class VisualAnimationSettings:
             (
                 "ANIMATION_SENTENCE_DURATION",
                 self.sentence_duration,
+            ),
+            (
+                "ANIMATION_SENTENCE_DELAY",
+                self.sentence_delay,
             ),
             ("ANIMATION_VISUAL_DELAY", self.visual_delay),
         ):
@@ -188,15 +197,16 @@ class VisualAnimationSettings:
             ),
             image_effect=config.ANIMATION_IMAGE_EFFECT,
             image_duration=config.ANIMATION_IMAGE_DURATION,
-            sentence_reveal_mode=(
-                config.ANIMATION_SENTENCE_REVEAL_MODE
-            ),
             sentence_effect=config.ANIMATION_SENTENCE_EFFECT,
             sentence_duration=(
                 config.ANIMATION_SENTENCE_DURATION
             ),
             sentence_direction=(
                 config.ANIMATION_SENTENCE_DIRECTION
+            ),
+            sentence_delay=config.ANIMATION_SENTENCE_DELAY,
+            sentence_mask_color=(
+                config.ANIMATION_SENTENCE_MASK_COLOR
             ),
             visual_delay=config.ANIMATION_VISUAL_DELAY,
         )
@@ -215,10 +225,43 @@ class VisualAnimationSettings:
     def direction_id(self, direction_name):
         return self.DIRECTION_IDS[direction_name]
 
-    def text_unit_effect(self):
-        return self.TEXT_UNIT_EFFECTS[
-            self.sentence_reveal_mode
+    def sentence_effect_id(self):
+        return self.SENTENCE_EFFECT_IDS[
+            self.sentence_effect
         ]
+
+    def sentence_mask_rgb(self):
+        return self._parse_mask_color(
+            self.sentence_mask_color
+        )
+
+    @staticmethod
+    def _parse_mask_color(value):
+        if not isinstance(value, str):
+            raise AnimationConfigurationError(
+                "ANIMATION_SENTENCE_MASK_COLOR must be a "
+                "hex color such as '#FFFFFF'."
+            )
+
+        hexadecimal = value.strip().lstrip("#")
+
+        if len(hexadecimal) != 6:
+            raise AnimationConfigurationError(
+                "ANIMATION_SENTENCE_MASK_COLOR must contain "
+                "exactly six hexadecimal digits."
+            )
+
+        try:
+            red = int(hexadecimal[0:2], 16)
+            green = int(hexadecimal[2:4], 16)
+            blue = int(hexadecimal[4:6], 16)
+        except ValueError as error:
+            raise AnimationConfigurationError(
+                "ANIMATION_SENTENCE_MASK_COLOR must be a "
+                "valid hexadecimal color."
+            ) from error
+
+        return red | (green << 8) | (blue << 16)
 
     @staticmethod
     def _validate_name(
