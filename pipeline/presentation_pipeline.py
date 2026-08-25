@@ -118,7 +118,7 @@ class PresentationPipeline:
         )
         log.info(
             "Embedding videos... "
-            f"{summary.video_clips} clips"
+            f"{summary.video_clips} silent autoplay clips"
         )
         log.info(
             "Applying visual animations... "

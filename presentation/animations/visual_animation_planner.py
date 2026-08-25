@@ -10,6 +10,23 @@ from presentation.animations.visual_animation_settings import (
 
 
 @dataclass(frozen=True)
+class HandwritingPenSpec:
+    enabled: bool
+    image_path: Path
+    width: float
+    offset_x: float
+    offset_y: float
+    hide_after_reveal: bool
+    pen_hide_duration: float
+    fallback_effect: str
+    letter_delay: float
+    line_return_duration: float
+    audio_gap: float
+    alpha_threshold: int
+    background_tolerance: int
+
+
+@dataclass(frozen=True)
 class VisualAnimationSpec:
     shape_name: str
     semantic_element: str
@@ -19,6 +36,7 @@ class VisualAnimationSpec:
     reveal_mode: str | None = None
     reveal_direction: str | None = None
     mask_color: int | None = None
+    handwriting_pen: HandwritingPenSpec | None = None
     required: bool = False
 
 
@@ -333,6 +351,53 @@ class VisualAnimationPlanner:
                 f"found {len(matches)}."
             )
 
+        handwriting_pen = None
+
+        if self.settings.sentence_effect == "handwriting_pen":
+            handwriting_pen = HandwritingPenSpec(
+                enabled=(
+                    self.settings.handwriting_pen_enabled
+                ),
+                image_path=Path(
+                    self.settings.handwriting_pen_image
+                ).resolve(),
+                width=self.settings.handwriting_pen_width,
+                offset_x=(
+                    self.settings.handwriting_pen_offset_x
+                ),
+                offset_y=(
+                    self.settings.handwriting_pen_offset_y
+                ),
+                hide_after_reveal=(
+                    self.settings
+                    .handwriting_hide_pen_after_reveal
+                ),
+                pen_hide_duration=(
+                    self.settings.handwriting_pen_hide_duration
+                ),
+                fallback_effect=(
+                    self.settings.handwriting_fallback_effect
+                ),
+                letter_delay=(
+                    self.settings.handwriting_letter_delay
+                ),
+                line_return_duration=(
+                    self.settings
+                    .handwriting_line_return_duration
+                ),
+                audio_gap=(
+                    self.settings.handwriting_audio_gap
+                ),
+                alpha_threshold=(
+                    self.settings
+                    .handwriting_pen_alpha_threshold
+                ),
+                background_tolerance=(
+                    self.settings
+                    .handwriting_pen_background_tolerance
+                ),
+            )
+
         return VisualAnimationSpec(
             shape_name=shape_name,
             semantic_element=semantic_element,
@@ -343,6 +408,7 @@ class VisualAnimationPlanner:
                 self.settings.sentence_direction
             ),
             mask_color=self.settings.sentence_mask_rgb(),
+            handwriting_pen=handwriting_pen,
             required=True,
         )
 

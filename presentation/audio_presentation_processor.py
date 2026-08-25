@@ -5,7 +5,13 @@ from presentation.embedders.audio_embedder import AudioEmbedder
 from presentation.audio_duration_calculator import AudioDurationCalculator
 from presentation.slide_timing.slide_timing_controller import SlideTimingController
 from presentation.timeline.slide_timeline import SlideTimeline
-from config import NO_AUDIO_SLIDE_DURATION
+from config import (
+    NO_AUDIO_SLIDE_DURATION,
+    PRESENTATION_SLIDE_END_PADDING,
+)
+from presentation.timeline.slide_end_time import (
+    SlideEndTimeCalculator,
+)
 from presentation.presentation_logger import (
     presentation_logger as log,
 )
@@ -150,7 +156,12 @@ class AudioPresentationProcessor:
                     if timeline.audio_events:
 
                         slide_duration = (
-                            timeline.duration
+                            SlideEndTimeCalculator.calculate(
+                                latest_audio_end=timeline.duration,
+                                end_padding=(
+                                    PRESENTATION_SLIDE_END_PADDING
+                                ),
+                            )
                         )
 
                     else:

@@ -34,10 +34,15 @@ class VisualAnimationSettings:
 
     SENTENCE_EFFECT_IDS = {
         "reveal_mask": 0,
+        "handwriting_pen": 0,
     }
 
     SENTENCE_DIRECTIONS = {
         "left_to_right",
+    }
+
+    HANDWRITING_FALLBACK_EFFECTS = {
+        "text_only",
     }
 
     new_word_transition: str
@@ -68,6 +73,20 @@ class VisualAnimationSettings:
     sentence_direction: str
     sentence_delay: float
     sentence_mask_color: str
+
+    handwriting_pen_enabled: bool
+    handwriting_pen_image: str
+    handwriting_pen_width: float
+    handwriting_pen_offset_x: float
+    handwriting_pen_offset_y: float
+    handwriting_hide_pen_after_reveal: bool
+    handwriting_pen_hide_duration: float
+    handwriting_fallback_effect: str
+    handwriting_letter_delay: float
+    handwriting_line_return_duration: float
+    handwriting_audio_gap: float
+    handwriting_pen_alpha_threshold: int
+    handwriting_pen_background_tolerance: int
 
     visual_delay: float
 
@@ -129,6 +148,47 @@ class VisualAnimationSettings:
         self._parse_mask_color(
             self.sentence_mask_color
         )
+        self._validate_name(
+            "ANIMATION_HANDWRITING_FALLBACK_EFFECT",
+            self.handwriting_fallback_effect,
+            self.HANDWRITING_FALLBACK_EFFECTS,
+        )
+        self._validate_boolean(
+            "ANIMATION_HANDWRITING_PEN_ENABLED",
+            self.handwriting_pen_enabled,
+        )
+        self._validate_boolean(
+            "ANIMATION_HANDWRITING_HIDE_PEN_AFTER_REVEAL",
+            self.handwriting_hide_pen_after_reveal,
+        )
+        self._validate_non_empty_string(
+            "ANIMATION_HANDWRITING_PEN_IMAGE",
+            self.handwriting_pen_image,
+        )
+        self._validate_positive(
+            "ANIMATION_HANDWRITING_PEN_WIDTH",
+            self.handwriting_pen_width,
+        )
+        self._validate_positive(
+            "ANIMATION_HANDWRITING_LETTER_DELAY",
+            self.handwriting_letter_delay,
+        )
+        self._validate_numeric(
+            "ANIMATION_HANDWRITING_PEN_OFFSET_X",
+            self.handwriting_pen_offset_x,
+        )
+        self._validate_numeric(
+            "ANIMATION_HANDWRITING_PEN_OFFSET_Y",
+            self.handwriting_pen_offset_y,
+        )
+        self._validate_byte(
+            "ANIMATION_HANDWRITING_PEN_ALPHA_THRESHOLD",
+            self.handwriting_pen_alpha_threshold,
+        )
+        self._validate_byte(
+            "ANIMATION_HANDWRITING_PEN_BACKGROUND_TOLERANCE",
+            self.handwriting_pen_background_tolerance,
+        )
         for setting_name, value in (
             ("ANIMATION_WORD_DURATION", self.word_duration),
             (
@@ -152,6 +212,18 @@ class VisualAnimationSettings:
             (
                 "ANIMATION_SENTENCE_DELAY",
                 self.sentence_delay,
+            ),
+            (
+                "ANIMATION_HANDWRITING_PEN_HIDE_DURATION",
+                self.handwriting_pen_hide_duration,
+            ),
+            (
+                "ANIMATION_HANDWRITING_LINE_RETURN_DURATION",
+                self.handwriting_line_return_duration,
+            ),
+            (
+                "ANIMATION_HANDWRITING_AUDIO_GAP",
+                self.handwriting_audio_gap,
             ),
             ("ANIMATION_VISUAL_DELAY", self.visual_delay),
         ):
@@ -207,6 +279,46 @@ class VisualAnimationSettings:
             sentence_delay=config.ANIMATION_SENTENCE_DELAY,
             sentence_mask_color=(
                 config.ANIMATION_SENTENCE_MASK_COLOR
+            ),
+            handwriting_pen_enabled=(
+                config.ANIMATION_HANDWRITING_PEN_ENABLED
+            ),
+            handwriting_pen_image=(
+                config.ANIMATION_HANDWRITING_PEN_IMAGE
+            ),
+            handwriting_pen_width=(
+                config.ANIMATION_HANDWRITING_PEN_WIDTH
+            ),
+            handwriting_pen_offset_x=(
+                config.ANIMATION_HANDWRITING_PEN_OFFSET_X
+            ),
+            handwriting_pen_offset_y=(
+                config.ANIMATION_HANDWRITING_PEN_OFFSET_Y
+            ),
+            handwriting_hide_pen_after_reveal=(
+                config.ANIMATION_HANDWRITING_HIDE_PEN_AFTER_REVEAL
+            ),
+            handwriting_pen_hide_duration=(
+                config.ANIMATION_HANDWRITING_PEN_HIDE_DURATION
+            ),
+            handwriting_fallback_effect=(
+                config.ANIMATION_HANDWRITING_FALLBACK_EFFECT
+            ),
+            handwriting_letter_delay=(
+                config.ANIMATION_HANDWRITING_LETTER_DELAY
+            ),
+            handwriting_line_return_duration=(
+                config.ANIMATION_HANDWRITING_LINE_RETURN_DURATION
+            ),
+            handwriting_audio_gap=(
+                config.ANIMATION_HANDWRITING_AUDIO_GAP
+            ),
+            handwriting_pen_alpha_threshold=(
+                config.ANIMATION_HANDWRITING_PEN_ALPHA_THRESHOLD
+            ),
+            handwriting_pen_background_tolerance=(
+                config
+                .ANIMATION_HANDWRITING_PEN_BACKGROUND_TOLERANCE
             ),
             visual_delay=config.ANIMATION_VISUAL_DELAY,
         )
@@ -294,4 +406,72 @@ class VisualAnimationSettings:
             raise AnimationConfigurationError(
                 f"{setting_name} cannot be negative; "
                 f"received {value}."
+            )
+
+    @staticmethod
+    def _validate_byte(
+        setting_name,
+        value,
+    ):
+        if not isinstance(value, int) or isinstance(value, bool):
+            raise AnimationConfigurationError(
+                f"{setting_name} must be an integer from 0 to 255; "
+                f"received {value!r}."
+            )
+
+        if not 0 <= value <= 255:
+            raise AnimationConfigurationError(
+                f"{setting_name} must be from 0 to 255; "
+                f"received {value}."
+            )
+
+    @staticmethod
+    def _validate_positive(
+        setting_name,
+        value,
+    ):
+        VisualAnimationSettings._validate_numeric(
+            setting_name,
+            value,
+        )
+
+        if value <= 0:
+            raise AnimationConfigurationError(
+                f"{setting_name} must be greater than 0; "
+                f"received {value}."
+            )
+
+    @staticmethod
+    def _validate_numeric(
+        setting_name,
+        value,
+    ):
+        if (
+            not isinstance(value, (int, float))
+            or isinstance(value, bool)
+        ):
+            raise AnimationConfigurationError(
+                f"{setting_name} must be numeric; "
+                f"received {value!r}."
+            )
+
+    @staticmethod
+    def _validate_boolean(
+        setting_name,
+        value,
+    ):
+        if not isinstance(value, bool):
+            raise AnimationConfigurationError(
+                f"{setting_name} must be True or False; "
+                f"received {value!r}."
+            )
+
+    @staticmethod
+    def _validate_non_empty_string(
+        setting_name,
+        value,
+    ):
+        if not isinstance(value, str) or not value.strip():
+            raise AnimationConfigurationError(
+                f"{setting_name} must be a non-empty path."
             )

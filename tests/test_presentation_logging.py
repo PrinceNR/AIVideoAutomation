@@ -244,7 +244,10 @@ class PresentationLoggingTests(unittest.TestCase):
         self.assertIn("Rendering slides... OK", terminal)
         self.assertIn("Progress bars... OK", terminal)
         self.assertIn("Embedding audio... 50 files", terminal)
-        self.assertIn("Embedding videos... 0 clips", terminal)
+        self.assertIn(
+            "Embedding videos... 0 silent autoplay clips",
+            terminal,
+        )
         self.assertIn(
             "Applying visual animations... 40 slides",
             terminal,

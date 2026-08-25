@@ -135,6 +135,12 @@ class PresentationBuilder:
             template_path=template_path,
         )
 
+        if video_clips:
+            self.video_presentation_processor.verify_saved_video_playback(
+                output_path,
+                verify_teaching_timeline=False,
+            )
+
         log.detail("Presentation created successfully!")
 
         return PresentationBuildSummary(

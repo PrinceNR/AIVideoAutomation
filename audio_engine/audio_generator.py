@@ -1,4 +1,5 @@
 from pathlib import Path
+from uuid import uuid4
 
 from audio_engine.tts_client_factory import (
     TTSClientFactory
@@ -10,6 +11,7 @@ from audio_engine.pronunciation_service import (
 from audio_engine.audio_file_validator import (
     AudioFileValidator
 )
+from audio_engine.file_cleanup import safe_unlink
 
 from models.word import Word
 
@@ -62,13 +64,10 @@ class AudioGenerator:
                 f"{word.word}; existing audio is valid."
             )
         else:
-            pronunciation_path.unlink(
-                missing_ok=True
+            safe_unlink(pronunciation_path)
+            temporary_path = self._temporary_path(
+                pronunciation_path
             )
-            temporary_path = pronunciation_path.with_name(
-                "pronunciation.partial.mp3"
-            )
-            temporary_path.unlink(missing_ok=True)
 
             try:
                 self.pronunciation_service.generate_verified(
@@ -88,7 +87,9 @@ class AudioGenerator:
                     pronunciation_path
                 )
             except Exception as error:
-                temporary_path.unlink(missing_ok=True)
+                self._cleanup_after_failure(
+                    temporary_path
+                )
                 print(
                     "Pronunciation generation failed for "
                     f"{word.word}: {error}"
@@ -136,11 +137,10 @@ class AudioGenerator:
                 )
                 continue
 
-            output_path.unlink(missing_ok=True)
-            temporary_path = output_path.with_name(
-                f"{output_path.stem}.partial.mp3"
+            safe_unlink(output_path)
+            temporary_path = self._temporary_path(
+                output_path
             )
-            temporary_path.unlink(missing_ok=True)
 
             try:
 
@@ -160,8 +160,9 @@ class AudioGenerator:
                 temporary_path.replace(output_path)
 
             except Exception as e:
-
-                temporary_path.unlink(missing_ok=True)
+                self._cleanup_after_failure(
+                    temporary_path
+                )
 
                 print(
                     f"Failed to generate "
@@ -175,3 +176,29 @@ class AudioGenerator:
         word.default_audio = str(
             pronunciation_path
         )
+
+    @staticmethod
+    def _temporary_path(output_path):
+        output_path = Path(output_path)
+        deterministic_path = output_path.with_name(
+            f"{output_path.stem}.partial.mp3"
+        )
+
+        if safe_unlink(deterministic_path):
+            return deterministic_path
+
+        return output_path.with_name(
+            f"{output_path.stem}.partial."
+            f"{uuid4().hex}.mp3"
+        )
+
+    @staticmethod
+    def _cleanup_after_failure(temporary_path):
+        try:
+            safe_unlink(temporary_path)
+        except Exception:
+            # Cleanup must never replace the synthesis/validation error.
+            print(
+                "WARNING: Temporary audio cleanup failed; "
+                "the original audio error was preserved."
+            )

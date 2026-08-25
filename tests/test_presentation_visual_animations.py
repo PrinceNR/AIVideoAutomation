@@ -2,6 +2,7 @@ import io
 import unittest
 from contextlib import redirect_stdout
 from dataclasses import replace
+from types import SimpleNamespace
 from unittest.mock import patch
 
 from pptx.enum.shapes import MSO_SHAPE_TYPE
@@ -356,8 +357,13 @@ class PresentationVisualAnimationTests(unittest.TestCase):
     TEMPLATE_PATH = "templates/vocabulary_template_v3.pptx"
 
     def setUp(self):
-        self.planner = VisualAnimationPlanner()
-        self.settings = self.planner.settings
+        self.settings = replace(
+            VisualAnimationSettings.from_project_config(),
+            sentence_effect="reveal_mask",
+        )
+        self.planner = VisualAnimationPlanner(
+            settings=self.settings
+        )
         self.processor = VisualAnimationPresentationProcessor(
             planner=self.planner
         )
@@ -390,6 +396,17 @@ class PresentationVisualAnimationTests(unittest.TestCase):
         sequence = sequence or FakeSequence(
             [audio_effect(duration=3.0)]
         )
+
+        for effect_index, effect in enumerate(
+            sequence.effects,
+            start=1,
+        ):
+            if effect.EffectType == 83 and effect.Shape is None:
+                effect.Shape = SimpleNamespace(
+                    Name=semantic_name,
+                    Id=effect_index,
+                )
+
         slide = FakeSlide(
             shapes=[sentence_shape] + list(extra_shapes or []),
             sequence=sequence,
