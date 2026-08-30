@@ -1,4 +1,7 @@
-from ai.content_generator import generate_vocabulary
+from ai.content_generator import (
+    LessonGenerationError,
+    generate_vocabulary,
+)
 from image_engine.image_downloader import ImageDownloader
 from utils.file_manager import FileManager
 from audio_engine.audio_generator import AudioGenerator
@@ -54,17 +57,41 @@ class VocabularyPipeline:
                     lesson_path=lesson_path
                 )
 
-        print("Generating lesson...")
+            if self._can_resume_content_verification(
+                checkpoint_lesson
+            ):
+                print(
+                    "Resuming content verification from "
+                    f"checkpoint: {lesson_path}"
+                )
+                lesson = checkpoint_lesson
+            else:
+                lesson = None
 
-        lesson = generate_vocabulary(topic, count, suggestions)
-        lesson.suggestions = suggestions
+        else:
+            lesson = None
 
-        lesson_dict = LessonMapper.to_dict(lesson)
+        if lesson is None:
+            print("Generating lesson...")
 
-        self.file_manager.save_json(
-            lesson_dict,
-            lesson_path
-        )
+            try:
+                lesson = generate_vocabulary(
+                    topic,
+                    count,
+                    suggestions,
+                )
+            except LessonGenerationError:
+                self._print_generation_failure_readiness()
+                return lesson_path
+
+            lesson.suggestions = suggestions
+
+            lesson_dict = LessonMapper.to_dict(lesson)
+
+            self.file_manager.save_json(
+                lesson_dict,
+                lesson_path
+            )
 
         verification_result = self.content_verifier.verify(
             lesson_path
@@ -116,10 +143,22 @@ class VocabularyPipeline:
             print("\nLesson contains verification errors.")
             print("Images and audio will not be generated.")
 
-            print("\nPlease review:")
-            print(
-                verification_result["semantic_report"]
-            )
+            report_paths = [
+                verification_result.get("rule_report"),
+                verification_result.get(
+                    "corrected_rule_report"
+                ),
+                verification_result.get("semantic_report"),
+            ]
+            report_paths = [
+                path for path in report_paths if path is not None
+            ]
+
+            if report_paths:
+                print("\nVerification reports:")
+
+                for report_path in report_paths:
+                    print(report_path)
 
             self._finish_stage1(
                 lesson=lesson,
@@ -195,6 +234,21 @@ class VocabularyPipeline:
         return bool(lesson.words) and all(
             word.preferred_media in valid_media_types
             for word in lesson.words
+        )
+
+    @staticmethod
+    def _can_resume_content_verification(lesson) -> bool:
+
+        state = getattr(
+            lesson,
+            "content_verification",
+            {},
+        )
+
+        return (
+            bool(lesson.words)
+            and bool(state)
+            and not bool(state.get("passed", False))
         )
 
     def _continue_lesson(
@@ -319,6 +373,25 @@ class VocabularyPipeline:
         assessor.print_report(
             readiness
         )
+
+    @staticmethod
+    def _print_generation_failure_readiness():
+
+        print(
+            "\nLesson generation failed: Gemini returned "
+            "invalid or incomplete JSON."
+        )
+        print("Recovery attempt failed.")
+        print("No media or audio was generated.")
+        print("Please rerun Stage 1.")
+        print("\nStage 1 pipeline execution completed.")
+        print("\nSTAGE 1 READINESS")
+        print("Content: INCOMPLETE")
+        print("Media: INCOMPLETE")
+        print("Audio: INCOMPLETE")
+        print("\nOverall:")
+        print("COMPLETED WITH ISSUES")
+        print("NOT READY FOR PRESENTATION")
 
     @staticmethod
     def _print_media_summary(words):

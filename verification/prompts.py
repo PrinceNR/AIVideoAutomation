@@ -81,6 +81,16 @@ can be subjective.
 
 ----- END ORIGINAL GEMINI PROMPT -----
 
+LOCAL RULE-BASED VERIFICATION FINDINGS:
+
+The JSON below comes from the project's deterministic local verifier.
+Correct every ERROR-level field it identifies. Do not change fields that
+only have WARNING-level findings.
+
+{rule_report}
+
+----- END LOCAL RULE-BASED FINDINGS -----
+
 GROUNDING RULES:
 
 Every issue you report must be based ONLY on the supplied

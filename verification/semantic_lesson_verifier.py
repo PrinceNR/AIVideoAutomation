@@ -22,7 +22,8 @@ class SemanticLessonVerifier:
     def verify(
         self,
         lesson_dict,
-        generation_prompt=""
+        generation_prompt="",
+        rule_report=None,
     ):
 
         suggestions = lesson_dict.get(
@@ -36,10 +37,17 @@ class SemanticLessonVerifier:
             indent=2
         )
 
+        rule_report_json = json.dumps(
+            rule_report or {},
+            ensure_ascii=False,
+            indent=2,
+        )
+
         prompt = (
             LESSON_VERIFICATION_PROMPT.format(
                 suggestions=suggestions,
                 generation_prompt=generation_prompt,
+                rule_report=rule_report_json,
                 lesson_json=lesson_json
             )
         )

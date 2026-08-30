@@ -13,6 +13,7 @@ OUTPUT_FOLDER = "output"
 CONTENT_VERIFIER_MODEL = "deepseek-v4-flash"
 
 GEMINI_CONTENT_MODEL = "gemini-3.5-flash-lite"
+CONTENT_GENERATION_VERBOSE_LOGGING = False
 GEMINI_FALLBACK_MODEL = "gemini-3.6-flash"
 
 

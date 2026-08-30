@@ -1,4 +1,5 @@
 from pathlib import Path
+import sys
 
 from models.lesson_mapper import (
     LessonMapper
@@ -34,6 +35,157 @@ class ContentVerifier:
         self.semantic_verifier = (
             SemanticLessonVerifier()
         )
+
+    # =================================================
+    # RULE DIAGNOSTICS
+    # =================================================
+
+    @classmethod
+    def _print_rule_issues(
+        cls,
+        report,
+        lesson_dict,
+        heading="Content verification issues",
+    ):
+
+        errors = cls._issues_at_level(
+            report,
+            "error",
+        )
+        warnings = cls._issues_at_level(
+            report,
+            "warning",
+        )
+
+        if not errors and not warnings:
+            return
+
+        print(f"\n{heading}:")
+
+        if errors:
+            print("\nERRORS")
+
+            for word_name, issue in errors:
+                field = issue.get("field") or "lesson"
+                reason = (
+                    issue.get("message")
+                    or issue.get("reason")
+                    or "Rule-based verification failed."
+                )
+                value = cls._lesson_field_value(
+                    lesson_dict,
+                    word_name,
+                    field,
+                )
+
+                print(
+                    f"word: {word_name or 'lesson-level'}"
+                )
+                print(f"field: {field}")
+                print(
+                    "rule: "
+                    f"{cls._rule_label(field, reason)}"
+                )
+
+                if value is not None:
+                    print(
+                        "value: "
+                        f"{cls._terminal_safe_text(value)}"
+                    )
+
+                print(f"reason: {reason}")
+
+        if warnings:
+            print("\nWarnings:")
+
+            for word_name, issue in warnings:
+                field = issue.get("field") or "lesson"
+                reason = (
+                    issue.get("message")
+                    or issue.get("reason")
+                    or "Rule-based verification warning."
+                )
+                print(
+                    f"{word_name or 'lesson-level'} / "
+                    f"{field}: {reason}"
+                )
+
+    @staticmethod
+    def _issues_at_level(report, level):
+
+        return [
+            (result.get("word", ""), issue)
+            for result in report.get("results", [])
+            for issue in result.get("issues", [])
+            if issue.get("level") == level
+        ]
+
+    @staticmethod
+    def _lesson_field_value(
+        lesson_dict,
+        word_name,
+        field,
+    ):
+
+        if not word_name:
+            return None
+
+        word = next(
+            (
+                item
+                for item in lesson_dict.get("words", [])
+                if str(item.get("word", "")).lower()
+                == str(word_name).lower()
+            ),
+            None,
+        )
+
+        if word is None:
+            return None
+
+        value = word
+
+        for part in str(field).split("."):
+            if not isinstance(value, dict):
+                return None
+
+            value = value.get(part)
+
+        return value
+
+    @staticmethod
+    def _rule_label(field, reason):
+
+        reason_text = str(reason).lower()
+
+        if (
+            str(field).startswith("translations.")
+            and "script characters" in reason_text
+        ):
+            return "translation_native_script"
+
+        if (
+            str(field).endswith("_sentence")
+            and "expected 7 to 15 words" in reason_text
+        ):
+            return "sentence_word_count"
+
+        return "rule_based_validation"
+
+    @staticmethod
+    def _terminal_safe_text(value):
+
+        text = str(value)
+        encoding = getattr(
+            sys.stdout,
+            "encoding",
+            None,
+        ) or "utf-8"
+
+        return text.encode(
+            encoding,
+            errors="backslashreplace",
+        ).decode(encoding)
 
     # =================================================
     # PREPARE DEEPSEEK CORRECTED LESSON
@@ -303,50 +455,14 @@ class ContentVerifier:
             f"{rule_summary.get('errors', 0)}"
         )
 
-        # ---------------------------------------------
-        # Structural/rule errors stop before DeepSeek
-        # ---------------------------------------------
-
-        if (
-            rule_summary.get(
-                "errors",
-                0
+        if rule_summary.get("errors", 0) > 0:
+            self._print_rule_issues(
+                rule_report,
+                lesson_dict,
             )
-            > 0
-        ):
-
             print(
-                "\nRule-based verification failed."
+                "\nAttempting one bounded correction pass..."
             )
-
-            return {
-                "passed": False,
-
-                "has_warnings":
-                    rule_summary.get(
-                        "warnings",
-                        0
-                    ) > 0,
-
-                "rule_errors":
-                    rule_summary.get(
-                        "errors",
-                        0
-                    ),
-
-                "semantic_errors": 0,
-
-                "corrected_lesson": None,
-
-                "rule_report":
-                    rule_report_path,
-
-                "semantic_report":
-                    None,
-
-                "corrected_rule_report":
-                    None
-            }
 
         # =================================================
         # 2. DEEPSEEK SEMANTIC VERIFICATION
@@ -360,7 +476,8 @@ class ContentVerifier:
             self.semantic_verifier.verify(
                 lesson_dict,
                 generation_prompt=
-                    generation_prompt
+                    generation_prompt,
+                rule_report=rule_report,
             )
         )
 
@@ -581,6 +698,13 @@ class ContentVerifier:
             print(
                 "❌ Corrected lesson still "
                 "contains verification errors."
+            )
+            self._print_rule_issues(
+                corrected_rule_report,
+                corrected_lesson,
+                heading=(
+                    "Unresolved content verification issues"
+                ),
             )
 
         elif has_warnings:
